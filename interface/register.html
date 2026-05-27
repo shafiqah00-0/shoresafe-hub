@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | ShoreSafe</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/interface/css/register.css">
+</head>
+<body>
+
+    <div class="register-container">
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+            <h2>🌊 ShoreSafe </h2>
+            <p>Join us to monitor shoreline for our next generation.</p>
+            <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.9;">
+                <!-- <p><i class="fa-solid fa-shield-halved"></i> Secure Data Access</p>
+                <p><i class="fa-solid fa-map-location-dot"></i> Geospatial Reporting</p> -->
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+            <h1 class="form-title">Create Account</h1>
+            
+            <!-- Error/Success Message Alert -->
+            <div id="alert-msg" style="display:none; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px;"></div>
+
+            <form id="registerForm">
+                <!-- Full Name -->
+                <div class="form-group">
+                    <i class="fa-solid fa-id-card"></i>
+                    <input type="text" name="full_name" placeholder="Full Name" required>
+                </div>
+
+                <!-- Username -->
+                <div class="form-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" name="username" placeholder="Username" required>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" name="email" placeholder="Email Address" required>
+                </div>
+
+                <!-- User Type (Mapped to your PHP $user_type) -->
+             <div class="form-group">
+                <i class="fa-solid fa-user-tag"></i>
+                <select name="user_type" required>
+                    <option value="" disabled selected>Select</option> 
+                    <option value="public">Public User</option>
+                    <option value="authority">Authority</option>
+                    <option value="stakeholders">Stakeholder</option>
+                </select>
+            </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <i class="fa-solid fa-eye toggle-password" onclick="togglePass()"></i>
+                    
+                    <div class="strength-meter">
+                        <div class="weak"></div>
+                        <div class="medium"></div>
+                        <div class="strong"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-register" id="submitBtn">Register Now</button>
+
+                <div class="login-link">
+                    Already registered? <a href="/index.php?page=login" style="color: #0077b6; text-decoration: none; font-weight: 600;">Log In</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const passwordInput = document.getElementById('password');
+    const strengthMeter = document.getElementById('strength-meter');
+
+    passwordInput.addEventListener('input', () => {
+        const val = passwordInput.value;
+        let score = 0;
+
+        if (val.length === 0) {
+            strengthMeter.className = "strength-meter"; 
+            return;
+        }
+
+        // 1. Length Rule
+        if (val.length >= 8) score++;
+        
+        // 2. Complexity Rule: Contains both letters and numbers
+        if (/[A-Za-z]/.test(val) && /[0-9]/.test(val)) score++;
+        
+        // 3. Advanced Rule: Contains special characters or uppercase mix
+        if (/[^A-Za-z0-9]/.test(val) || (/[a-z]/.test(val) && /[A-Z]/.test(val))) score++;
+
+        // Update UI classes based on score results
+        if (score === 1) {
+            strengthMeter.className = "strength-meter is-weak";
+        } else if (score === 2) {
+            strengthMeter.className = "strength-meter is-medium";
+        } else if (score >= 3) {
+            strengthMeter.className = "strength-meter is-strong";
+        }
+            });
+        });
+        function togglePass() {
+            const passInput = document.getElementById('password');
+            const icon = document.querySelector('.toggle-password');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // AJAX Submission
+        const form = document.getElementById('registerForm');
+        const alertMsg = document.getElementById('alert-msg');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Processing...";
+            
+            const formData = new FormData(form);
+
+            try {
+                // Change 'register.php' to the actual path of your PHP file
+                const response = await fetch('/logic/controller/registercontroller.php', { 
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                alertMsg.style.display = 'block';
+                alertMsg.innerText = data.message;
+                
+                if (data.success) {
+                    alertMsg.style.background = '#d1edda';
+                    alertMsg.style.color = '#155724';
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    alertMsg.style.background = '#f8d7da';
+                    alertMsg.style.color = '#721c24';
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Register Now";
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alertMsg.style.display = 'block';
+                alertMsg.innerText = "An error occurred. Please try again.";
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Register Now";
+            }
+        });
+    </script>
+</body>
+</html>

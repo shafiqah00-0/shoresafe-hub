@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | ShoreSafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/interface/css/login.css">
+</head>
+<body class="login-page">
+
+<header class="navbar-top">
+    <div class="logo">🌊 ShoreSafe</div>
+    <nav>
+        <a href="/interface/mainpage.php" class="btn-guest-header">Home</a>
+        <a href="/interface/dashboard/public.php" class="btn-guest-header">Continue as Guest</a>
+    </nav>
+</header>
+
+<main class="main-content">
+    <div class="login-card">
+        <div class="card-header">
+            <h2>Welcome Back</h2>
+            <p>Please enter your details to sign in.</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Username</label>
+                <div class="input-wrapper">
+                    <i class="far fa-user"></i>
+                    <input type="text" name="username" placeholder="Enter your username" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="label-row">
+                    <label>Password</label>
+                    <a href="#" class="forgot-link" onclick="openForgotModal(event)">Forgot?</a>
+                </div>
+                <div class="input-wrapper">
+                    <i class="far fa-lock"></i>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-signin">Sign In</button>
+        </form>
+
+        <div class="card-footer">
+            <p>New User? <a href="/interface/register.html">Register here!</a></p>
+        </div>
+    </div>
+</main>
+
+<div id="forgotPasswordModal" class="modal-overlay">
+    <div class="modal-card">
+        <button class="modal-close-btn" onclick="closeForgotModal()"><i class="fas fa-times"></i></button>
+        
+        <div class="modal-header">
+            <h3>Reset Password</h3>
+        </div>
+        
+        <div id="modalAlert" class="modal-alert"></div>
+        
+        <form id="forgotForm">
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label style="display:block; margin-bottom:8px; font-weight:500; font-size:14px; color:#475569;">Email Address</label>
+                <div class="input-wrapper" style="position:relative;">
+                    <i class="far fa-envelope" style="position:absolute; left:15px; top:50%; transform:translateY(-50%); color:#94a3b8;"></i>
+                    <input type="email" name="email" placeholder="name@example.com" required>
+                </div>
+            </div>
+            <button type="submit" id="forgotSubmitBtn" class="btn-modal-action">Reset </button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Open the Popup smoothly
+function openForgotModal(e) {
+    if(e) e.preventDefault();
+    const alertBox = document.getElementById('modalAlert');
+    const formElement = document.getElementById('forgotForm');
+    
+    alertBox.style.display = 'none'; 
+    formElement.style.display = 'block'; // Ensure form structure is visible if reopened
+    formElement.reset(); 
+    
+    document.getElementById('forgotPasswordModal').classList.add('is-open');
+}
+
+// Close the Popup smoothly
+function closeForgotModal() {
+    document.getElementById('forgotPasswordModal').classList.remove('is-open');
+}
+
+// Close popup instantly if user clicks outside the modal card box area
+document.getElementById('forgotPasswordModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeForgotModal();
+    }
+});
+
+// AJAX ASYNCHRONOUS FORGOT PASSWORD TASK MANAGER
+document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const alertBox = document.getElementById('modalAlert');
+    const submitBtn = document.getElementById('forgotSubmitBtn');
+    const formElement = document.getElementById('forgotForm');
+    
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Verifying...";
+    
+    try {
+        const response = await fetch("/logic/controller/forgotpasswort.php", {
+            method: "POST",
+            body: new FormData(this)
+        });
+        const data = await response.json();
+        
+        alertBox.style.display = "block";
+        
+        if (data.success) {
+            alertBox.style.background = "#ecfdf5";
+            alertBox.style.color = "#065f46";
+            alertBox.style.borderColor = "#a7f3d0";
+            
+            // 🎯 THE FIX: Separate the text message from the link and build a clickable anchor
+            const rawMessage = data.message;
+            const linkIndex = rawMessage.indexOf("http://");
+            
+            if (linkIndex !== -1) {
+                const textPart = rawMessage.substring(0, linkIndex);
+                const urlPart = rawMessage.substring(linkIndex);
+                
+                // Render the message with a styled, clickable link button
+                alertBox.innerHTML = `
+                    <div>${textPart}</div>
+                    <a href="${urlPart}" class="modal-click-link" style="display:inline-block; margin-top:10px; color:#0077b6; font-weight:600; text-decoration:underline;">
+                        Click here to reset password <i class="fas fa-external-link-alt" style="font-size:12px;"></i>
+                    </a>
+                `;
+            } else {
+                alertBox.innerText = rawMessage;
+            }
+            
+            formElement.style.display = 'none'; // Hide form fields so the link stands out
+        } else {
+            alertBox.style.background = "#fef2f2";
+            alertBox.style.color = "#991b1b";
+            alertBox.style.borderColor = "#fca5a5";
+            alertBox.innerText = data.message;
+        }
+    } catch(err) {
+        alertBox.style.display = "block";
+        alertBox.style.background = "#fef2f2";
+        alertBox.style.color = "#991b1b";
+        alertBox.style.borderColor = "#fca5a5";
+        alertBox.innerText = "Connection error. Check your server paths.";
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Reset";
+    }
+});
+
+// MAIN LOGIN FORM SUBMISSION ACTION
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    try {
+        const response = await fetch("/logic/controller/logincontroller.php", {
+            method: "POST",
+            body: new FormData(this)
+        });
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = data.redirect;
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert("Server communication error.");
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+/* ===== GLOBAL ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background: linear-gradient(to bottom, #eaf6ff, #ffffff);
+    color: #1f2d3d;
+    line-height: 1.6;
+}
+
+/* ===== ALERT BAR ===== */
+.alert-bar {
+    background: #ff3b3b;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+}
+
+/* ===== HEADER ===== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: #0077b6;
+}
+
+nav a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    color: #0077b6;
+}
+
+.btn-report {
+    background: #ff6b35;
+    padding: 8px 14px;
+    border-radius: 8px;
+    color: white !important;
+}
+
+.btn-login {
+    background: #0077b6;
+    padding: 8px 14px;
+    border-radius: 8px;
+    color: white !important;
+}
+
+/* ===== HERO (WAVE FIXED VERSION) ===== */
+.hero {
+    height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    /* ocean background */
+    background: linear-gradient(to top, #caf0f8, #ade8f4);
+}
+
+/* HERO CONTENT ABOVE WAVES */
+.hero-content {
+    position: relative;
+    z-index: 10;
+   
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: black;
+    animation: slideIn 1s ease-out;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: black;
+    opacity: 0.9;
+    animation: fadeIn 1.5s ease-out;
+}
+
+/* BUTTON */
+.hero-btn {
+    margin-top: 20px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    background: #0077b6;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.hero-btn:hover {
+    background: #023e8a;
+    transform: scale(1.05);
+}
+
+/* ===== WAVES ===== */
+ .wave {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 120px;
+  background-repeat: repeat-x;
+    opacity: 0.6;
+} */
+
+/* LAYER 1 */
+.wave1 {
+    animation: waveMove 8s linear infinite;
+    z-index: 1;
+    bottom: 0;
+}
+
+/* LAYER 2 */
+.wave2 {
+    animation: waveMoveReverse 12s linear infinite;
+    opacity: 0.4;
+    bottom: 10px;
+    z-index: 2;
+}
+
+/* LAYER 3 */
+.wave3 {
+    animation: waveMove 16s linear infinite;
+    opacity: 0.3;
+    bottom: 20px;
+    z-index: 3;
+}
+
+/* ===== STATUS ===== */
+.status {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.status h2 {
+    margin-bottom: 30px;
+}
+
+.status-cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.status-card {
+    width: 200px;
+    padding: 20px;
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+}
+
+.high { background: #e63946; }
+.medium { background: #f4a261; }
+.low { background: #2a9d8f; }
+
+/* ===== INFO ===== */
+.info, .about, .cta {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.info-box {
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    text-align: left;
+}
+
+/* ===== MAP ===== */
+.map-section {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+#map {
+    height: 450px;
+    width: 90%;
+    margin: 20px auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* ===== CTA ===== */
+.cta {
+    background: #0077b6;
+    color: white;
+}
+
+.btn-big {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 25px;
+    background: #ff6b35;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-big:hover {
+    background: #ff814d;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #0b1d2a;
+    color: white;
+    margin-top: 40px;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes waveMove {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes waveMoveReverse {
+    0% {
+        transform: translateX(-50%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}

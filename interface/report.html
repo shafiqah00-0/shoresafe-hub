@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Report - ShoreSafe</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="/interface/css/report.css">
+    <style>
+        #map { height: 350px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ccc; }
+        .loading { opacity: 0.6; pointer-events: none; }
+        #responseMsg { font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">🌊 ShoreSafe</div>
+    <nav>
+        <a href="/interface/mainpage.php">Home</a>
+        <a href="/interface/login.html" class="btn-login">Login</a>
+    </nav>
+</header>
+
+<section class="report">
+    <h2>Submit Your Report</h2>
+
+    <form id="reportForm" enctype="multipart/form-data">
+        <p class="map-hint">
+        📍 Please click on the map to select your location.  
+        The state and exact shoreline location will be filled in automatically.
+        </p>
+        <div id="map"></div>
+
+        <!-- Hidden coordinates -->
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <!-- Location Info (Read Only) -->
+        <label>Name:</label>
+        <input type="text" name="name" id="name" placeholder="Your name (optional)">
+        
+        <label>Detected State:</label>
+        <input type="text" name="state" id="state" readonly required>
+        
+        <label>Exact Shoreline Location:</label>
+        <input type="text" name="exact_location" id="location" readonly required>
+
+        <label>Date of Observation:</label>
+        <input type="date" name="date" id="reportDate" required value="<?= date('Y-m-d'); ?>">
+
+        <label>Description:</label>
+        <textarea name="description" placeholder="Describe the erosion or coastal changes..." required></textarea>
+
+        <label>Upload Photo:</label>
+        <input type="file" name="image" accept="image/*">
+
+        <button type="submit" id="submitBtn">Submit Report</button>
+    </form>
+
+    <p id="responseMsg"></p>
+</section>
+
+<footer>
+    <p>© 2026 ShoreSafe</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // 1. Initialize Map
+    var map = L.map('map').setView([4.2105, 101.9758], 6); // Centered on Malaysia
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+   let marker;
+    let firstClick = true;
+
+    map.on('click', function (e) {
+
+    const { lat, lng } = e.latlng;
+
+    // ✅ First-click guide popup
+    if (firstClick) {
+        L.popup()
+            .setLatLng(e.latlng)
+            .setContent("✔ Location selected!<br>State and exact shoreline location will be auto-filled.")
+            .openOn(map);
+
+        firstClick = false;
+    }
+
+    // Marker handling
+    if (!marker) {
+        marker = L.marker([lat, lng]).addTo(map);
+    } else {
+        marker.setLatLng([lat, lng]);
+    }
+
+    // Store coordinates
+    document.getElementById("latitude").value = lat;
+    document.getElementById("longitude").value = lng;
+
+    // Reverse geocoding
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+        .then(res => res.json())
+        .then(data => {
+            const addr = data.address;
+            const state = addr.state || addr.region || "Unknown State";
+
+            const beach = addr.beach || addr.suburb || addr.village || "";
+            const road = addr.road || "";
+
+            const exactLocation = [beach, road].filter(Boolean).join(", ")
+                || "Coastal Point (" + lat.toFixed(4) + ")";
+
+            document.getElementById("state").value = state;
+            document.getElementById("location").value = exactLocation;
+        })
+        .catch(err => console.error("Geocoding error:", err));
+    });
+
+    // 3. Form Submission logic
+    document.getElementById('reportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const msg = document.getElementById('responseMsg');
+        
+        // Visual Feedback
+        btn.innerText = "Sending...";
+        btn.classList.add('loading');
+        msg.innerText = "";
+
+        const formData = new FormData(this);
+        
+        fetch('../logic/controller/reportcontroller.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.innerText = "Submit Report";
+            btn.classList.remove('loading');
+            
+            msg.innerText = data.message;
+            msg.style.color = data.success ? "green" : "red";
+            
+            if(data.success) {
+                this.reset();
+                if(marker) map.removeLayer(marker);
+            }
+        })
+        .catch(err => {
+            btn.innerText = "Submit Report";
+            btn.classList.remove('loading');
+            msg.innerText = "Connection Error. Please try again.";
+            msg.style.color = "red";
+            console.error("Error:", err);
+        });
+    });
+</script>
+</body>
+</html>

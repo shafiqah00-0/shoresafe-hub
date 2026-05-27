@@ -1,0 +1,154 @@
+/* ==========================================================================
+   SHORESAFE PUBLIC DASHBOARD STYLES
+   ========================================================================== */
+
+/* Core Document Setup */
+body {
+    background-color: #f7fafc;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Base Wrapper Layout */
+.public-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header Elements Styling */
+.public-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-titles h1 {
+    font-size: 2rem;
+    color: #1a202c;
+    margin: 0;
+    font-weight: 700;
+}
+
+.header-titles p {
+    color: #718096;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+}
+
+.icon-blue {
+    color: #3182ce;
+}
+
+/* Action/Navigation Badges */
+.login-badge-btn {
+    text-decoration: none;
+    background: #3182ce;
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(49, 130, 206, 0.2);
+}
+
+.login-badge-btn:hover {
+    background: #2b6cb0;
+}
+
+/* Data Table Presentation Rules */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.data-table th, 
+.data-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+    background-color: #edf2f7;
+    color: #4a5568;
+    font-weight: 600;
+}
+
+.location-name {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+/* Count Data Pill Badge */
+.badge-count {
+    background: #ebf8ff;
+    color: #2b6cb0;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: bold;
+    font-size: 0.875rem;
+    display: inline-block;
+}
+
+/* Empty State Handling */
+.empty-row {
+    text-align: center;
+    color: #a0aec0;
+    padding: 2rem !important;
+}/* User Profile Badge for logged in status views */
+.user-profile-badge {
+    background: #e2e8f0;
+    color: #2d3748;
+    padding: 0.5rem 1.2rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+/* --- 6. Risk Level Badges (Lighter Styles) --- */
+.risk-badge {
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    display: inline-block;
+    border: 1px solid transparent;
+}
+
+/* Light Yellow style for Medium Risk */
+.risk-badge.medium {
+    background-color: #fff7ed; /* Soft light orange/yellow background */
+    color: #c2410c;            /* Readable dark orange text */
+    border-color: #ffedd5;
+}
+
+/* Light Red style for High Risk (Optional addition) */
+.risk-badge.high {
+    background-color: #fef2f2; /* Soft light red background */
+    color: #b91c1c;            /* Readable dark red text */
+    border-color: #fee2e2;
+}
+
+/* Light Green style for Low Risk (Optional addition) */
+.risk-badge.low {
+    background-color: #f0fdf4; /* Soft light green background */
+    color: #15803d;            /* Readable dark green text */
+    border-color: #dcfce7;
+}
