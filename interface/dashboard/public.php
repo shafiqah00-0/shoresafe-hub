@@ -112,7 +112,7 @@ $total_reports = $stmt->fetchColumn();
                 </div>
                 <div class="warn-modal-body">
                     <p class="warn-location-badge">📍 <?= htmlspecialchars($alertLocationData['exact_location']) ?>, <?= htmlspecialchars($alertLocationData['state']) ?></p>
-                    <p class="warn-warning-text">Location that is risky to visit spotted within the last 14 days. Please avoid the erosion place fpr safety purposes.</p>
+                    <p class="warn-warning-text">This high risk location was detected within the last 14 days. Please avoid this area for safety purposes.</p>
                 </div>
                 <div class="warn-action-footer">
                     <a href="#status" class="warn-btn-primary">View Current Risk Status</a>
