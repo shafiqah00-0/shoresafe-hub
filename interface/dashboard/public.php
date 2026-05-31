@@ -1,5 +1,31 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$showPublicAlert = false;
+$alertLocationData = null;
+
+if (!isset($_SESSION['public_warning_dismissed'])) {
+    try {
+        // Look for high-risk data from the last 14 days
+        $queryAlert = "
+            SELECT l.exact_location, l.state, a.erosion_risk, a.analysisid
+            FROM public.generated_analysis a
+            JOIN public.location l ON a.locationid = l.locationid
+            WHERE LOWER(a.erosion_risk) = 'high'
+              AND a.created_at >= CURRENT_DATE - INTERVAL '14 days'
+            ORDER BY a.analysisid DESC 
+            LIMIT 1
+        ";
+        $stmtAlert = $pdo->prepare($queryAlert);
+        $stmtAlert->execute();
+        $alertLocationData = $stmtAlert->fetch(PDO::FETCH_ASSOC);
+
+        if ($alertLocationData) { $showPublicAlert = true; }
+    } catch (PDOException $e) {
+        error_log("Guest Dashboard Alert Error: " . $e->getMessage());
+    }
+}
 
 $role = $_SESSION['role_type'] ?? 'guest';
 $username = $_SESSION['username'] ?? 'Guest';
@@ -76,8 +102,27 @@ $total_reports = $stmt->fetchColumn();
 
         <div class="section-title" style="margin-bottom: 1.5rem; font-weight: bold; color: #4a5568;">Quick Actions</div>
         
-       
-
+    <?php if ($showPublicAlert && $alertLocationData): ?>
+<div id="risk-modal" class="zus-notification-overlay">
+    <div class="warn-notification-card">
+        <button id="dismiss-alert-x" class="zus-close-btn">&times;</button>
+        <div class="warn-card-accent-bar"></div>
+        <div class="warn-card-content">
+            <div class="warn-warning-header">
+                <span class="warn-pulse-dot"></span>
+                <h2>High-Risk Incident Tracking Advisory</h2>
+            </div>
+            <div class="warn-modal-body">
+                <p class="warn-location-badge">📍 <?= htmlspecialchars($alertLocationData['exact_location']) ?>, <?= htmlspecialchars($alertLocationData['state']) ?></p>
+                <p class="warn-warning-text">Analytical metrics processing has flagged critical shoreline displacement changes within this quadrant inside the last 14 days. Monitor tracking data maps below.</p>
+            </div>
+            <div class="warn-action-footer">
+                <a href="#status" class="warn-btn-primary">View Current Risk Status</a>
+            </div>
+        </div>
+    </div>
+</div>   
+<?php endif; ?>
 
 <script>
     const sidebar = document.getElementById('sidebar');
@@ -95,6 +140,19 @@ $total_reports = $stmt->fetchColumn();
             toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
         }
     });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const closeBtn = document.getElementById("dismiss-alert-x");
+    const modal = document.getElementById("risk-modal");
+    if (closeBtn && modal) {
+        closeBtn.addEventListener("click", () => {
+            modal.classList.add("zus-fade-out");
+            setTimeout(() => { modal.style.display = "none"; }, 250);
+            fetch("/interface/dashboard/warningpopup.php", { method: "POST" });
+        });
+    }
+});
 </script>
 </body>
 </html>

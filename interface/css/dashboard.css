@@ -267,3 +267,159 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
 .meta-info p {
     margin: 0;
 }
+/* ==========================================================================
+   ZUS COFFEE INSPIRED MINIMALIST APP NOTIFICATIONS
+   ========================================================================== */
+.zus-notification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100002;
+    padding: 24px;
+    box-sizing: border-box;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.zus-notification-overlay.zus-fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.zus-notification-card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    box-sizing: border-box;
+    animation: zusSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes zusSlideIn {
+    from { transform: translateY(30px) scale(0.97); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.warn-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 28px;
+    color: #4a5568;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.warn-close-btn:hover {
+    background: rgba(229, 62, 62, 0.1);
+    color: #e53e3e;
+}
+
+.warn-card-accent-bar {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #e53e3e, #feb2b2);
+}
+
+.warn-card-content {
+    padding: 28px 24px 24px 24px;
+    text-align: left;
+}
+
+.warn-warning-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.warn-pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #e53e3e;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7);
+    animation: zusPulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes warnPulse {
+    to { box-shadow: 0 0 0 8px rgba(229, 62, 62, 0); }
+}
+
+.warn-warning-header h2 {
+    color: #1a202c;
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+}
+
+.warn-location-badge {
+    background: rgba(229, 62, 62, 0.06);
+    border: 1px solid rgba(229, 62, 62, 0.12);
+    color: #e53e3e;
+    padding: 6px 12px;
+    border-radius: 12px;
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+}
+
+.warn-warning-text {
+    color: #4a5568;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0 0 24px 0;
+}
+
+.warn-action-footer {
+    width: 100%;
+}
+
+.warn-btn-primary {
+    background: #1a202c;
+    color: #ffffff !important;
+    padding: 14px;
+    border-radius: 14px;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: block;
+    text-align: center;
+    box-sizing: border-box;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(26, 32, 44, 0.15);
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.warn-btn-primary:hover {
+    background: #2d3748;
+}
+
+.warn-btn-primary:active {
+    transform: scale(0.98);
+}
