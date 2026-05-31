@@ -2,6 +2,10 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// 1. FIXED: Moved DB connection to the absolute top so $pdo is available for the alert query!
+require_once __DIR__ . '/../../config/database.php';
+
 $showPublicAlert = false;
 $alertLocationData = null;
 
@@ -13,7 +17,7 @@ if (!isset($_SESSION['public_warning_dismissed'])) {
             FROM public.generated_analysis a
             JOIN public.location l ON a.locationid = l.locationid
             WHERE LOWER(a.erosion_risk) = 'high'
-              AND a.created_at >= CURRENT_DATE - INTERVAL '14 days'
+              AND a.analysis_update >= CURRENT_DATE - INTERVAL '14 days'
             ORDER BY a.analysisid DESC 
             LIMIT 1
         ";
@@ -30,9 +34,7 @@ if (!isset($_SESSION['public_warning_dismissed'])) {
 $role = $_SESSION['role_type'] ?? 'guest';
 $username = $_SESSION['username'] ?? 'Guest';
 
-// DB connection if needed
-require_once __DIR__ . '/../../config/database.php';
-
+// Fetch total counts for stat cards
 $stmt = $pdo->query("SELECT COUNT(*) FROM report");
 $total_reports = $stmt->fetchColumn();
 ?>
@@ -103,7 +105,7 @@ $total_reports = $stmt->fetchColumn();
         <div class="section-title" style="margin-bottom: 1.5rem; font-weight: bold; color: #4a5568;">Quick Actions</div>
         
     <?php if ($showPublicAlert && $alertLocationData): ?>
-<div id="risk-modal" class="zus-notification-overlay">
+<div id="risk-modal" class="warn-notification-overlay">
     <div class="warn-notification-card">
         <button id="dismiss-alert-x" class="zus-close-btn">&times;</button>
         <div class="warn-card-accent-bar"></div>
