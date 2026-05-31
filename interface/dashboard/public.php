@@ -108,11 +108,11 @@ $total_reports = $stmt->fetchColumn();
             <div class="warn-card-content">
                 <div class="warn-warning-header">
                     <span class="warn-pulse-dot"></span>
-                    <h2>High-Risk Incident Tracking Advisory</h2>
+                    <h2>High-Risk Alert Location</h2>
                 </div>
                 <div class="warn-modal-body">
                     <p class="warn-location-badge">📍 <?= htmlspecialchars($alertLocationData['exact_location']) ?>, <?= htmlspecialchars($alertLocationData['state']) ?></p>
-                    <p class="warn-warning-text">Analytical metrics processing has flagged critical shoreline displacement changes within this quadrant inside the last 14 days. Monitor tracking data maps below.</p>
+                    <p class="warn-warning-text">Location that is risky to visit spotted within the last 14 days. Please avoid the erosion place fpr safety purposes.</p>
                 </div>
                 <div class="warn-action-footer">
                     <a href="#status" class="warn-btn-primary">View Current Risk Status</a>
