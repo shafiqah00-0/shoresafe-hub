@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("risk-modal");
     if (closeBtn && modal) {
         closeBtn.addEventListener("click", () => {
-            modal.classList.add("zus-fade-out");
+            modal.classList.add("warn-fade-out");
             setTimeout(() => { modal.style.display = "none"; }, 250);
             fetch("/interface/dashboard/warningpopup.php", { method: "POST" });
         });
