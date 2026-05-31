@@ -17,7 +17,7 @@ if (!isset($_SESSION['public_warning_dismissed'])) {
             FROM public.generated_analysis a
             JOIN public.location l ON a.locationid = l.locationid
             WHERE LOWER(a.erosion_risk) = 'high'
-              AND a.analysis_update >= CURRENT_DATE - INTERVAL '14 days'
+              AND a.anaysis_update >= NOW() - INTERVAL '14 days'
             ORDER BY a.analysisid DESC 
             LIMIT 1
         ";
