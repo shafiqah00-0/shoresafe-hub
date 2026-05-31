@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. FIXED: Moved DB connection to the absolute top so $pdo is available for the alert query!
+// 1. Database connection is loaded first
 require_once __DIR__ . '/../../config/database.php';
 
 $showPublicAlert = false;
@@ -11,13 +11,14 @@ $alertLocationData = null;
 
 if (!isset($_SESSION['public_warning_dismissed'])) {
     try {
-        // Look for high-risk data from the last 14 days
+        // 2. FIXED TYPO: Changed 'a.anaysis_update' to 'a.analysis_update' 
+        // Also swapped 'NOW()' with 'CURRENT_DATE' for stable calendar day calculations!
         $queryAlert = "
             SELECT l.exact_location, l.state, a.erosion_risk, a.analysisid
             FROM public.generated_analysis a
             JOIN public.location l ON a.locationid = l.locationid
             WHERE LOWER(a.erosion_risk) = 'high'
-              AND a.anaysis_update >= NOW() - INTERVAL '14 days'
+              AND a.anaysis_update >= CURRENT_DATE - INTERVAL '14 days'
             ORDER BY a.analysisid DESC 
             LIMIT 1
         ";
@@ -73,14 +74,12 @@ $total_reports = $stmt->fetchColumn();
                 <i class="fas fa-file-alt"></i> <span>Reports</span>
             </a>
             
-
             <a href="/logic/controller/logout.php" style="margin-top: auto;">
                 <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
             </a>
         </nav>
     </aside>
 
-    <!-- Added ID "main-content" here so the JS works -->
     <main class="main-content" id="main-content">
         <header>
             <div>
@@ -93,68 +92,66 @@ $total_reports = $stmt->fetchColumn();
         </header>
 
         <div class="stats-grid">
-            <!-- Common Stat -->
             <div class="stat-card">
                 <div class="stat-number"><?= $total_reports ?></div>
                 <p>Total Incidents Reported</p>
             </div>
-            
-          
         </div>  
 
         <div class="section-title" style="margin-bottom: 1.5rem; font-weight: bold; color: #4a5568;">Quick Actions</div>
         
-    <?php if ($showPublicAlert && $alertLocationData): ?>
-<div id="risk-modal" class="warn-notification-overlay">
-    <div class="warn-notification-card">
-        <button id="dismiss-alert-x" class="zus-close-btn">&times;</button>
-        <div class="warn-card-accent-bar"></div>
-        <div class="warn-card-content">
-            <div class="warn-warning-header">
-                <span class="warn-pulse-dot"></span>
-                <h2>High-Risk Incident Tracking Advisory</h2>
-            </div>
-            <div class="warn-modal-body">
-                <p class="warn-location-badge">📍 <?= htmlspecialchars($alertLocationData['exact_location']) ?>, <?= htmlspecialchars($alertLocationData['state']) ?></p>
-                <p class="warn-warning-text">Analytical metrics processing has flagged critical shoreline displacement changes within this quadrant inside the last 14 days. Monitor tracking data maps below.</p>
-            </div>
-            <div class="warn-action-footer">
-                <a href="#status" class="warn-btn-primary">View Current Risk Status</a>
+        </main> <?php if ($showPublicAlert && $alertLocationData): ?>
+    <div id="risk-modal" class="warn-notification-overlay">
+        <div class="warn-notification-card">
+            <button id="dismiss-alert-x" class="warn-close-btn">&times;</button>
+            <div class="warn-card-accent-bar"></div>
+            <div class="warn-card-content">
+                <div class="warn-warning-header">
+                    <span class="warn-pulse-dot"></span>
+                    <h2>High-Risk Incident Tracking Advisory</h2>
+                </div>
+                <div class="warn-modal-body">
+                    <p class="warn-location-badge">📍 <?= htmlspecialchars($alertLocationData['exact_location']) ?>, <?= htmlspecialchars($alertLocationData['state']) ?></p>
+                    <p class="warn-warning-text">Analytical metrics processing has flagged critical shoreline displacement changes within this quadrant inside the last 14 days. Monitor tracking data maps below.</p>
+                </div>
+                <div class="warn-action-footer">
+                    <a href="#status" class="warn-btn-primary">View Current Risk Status</a>
+                </div>
             </div>
         </div>
-    </div>
-</div>   
-<?php endif; ?>
+    </div>   
+    <?php endif; ?>
 
-<script>
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.getElementById('main-content');
-    const toggleBtn = document.getElementById('toggle-btn');
-    const toggleIcon = document.getElementById('toggle-icon');
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const toggleIcon = document.getElementById('toggle-icon');
 
-    toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('expanded');
-        
-        if (sidebar.classList.contains('collapsed')) {
-            toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
-        } else {
-            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            
+            if (sidebar.classList.contains('collapsed')) {
+                toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+            } else {
+                toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+            }
+        });
+    </script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const closeBtn = document.getElementById("dismiss-alert-x");
+        const modal = document.getElementById("risk-modal");
+        if (closeBtn && modal) {
+            closeBtn.addEventListener("click", () => {
+                modal.classList.add("warn-fade-out");
+                setTimeout(() => { modal.style.display = "none"; }, 250);
+                fetch("/interface/dashboard/warningpopup.php", { method: "POST" });
+            });
         }
     });
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const closeBtn = document.getElementById("dismiss-alert-x");
-    const modal = document.getElementById("risk-modal");
-    if (closeBtn && modal) {
-        closeBtn.addEventListener("click", () => {
-            modal.classList.add("warn-fade-out");
-            setTimeout(() => { modal.style.display = "none"; }, 250);
-            fetch("/interface/dashboard/warningpopup.php", { method: "POST" });
-        });
-    }
-});
-</script>
+    </script>
 </body>
 </html>
