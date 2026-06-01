@@ -9,36 +9,36 @@ $username = $_SESSION['username'] ?? 'Guest';
 
 require_once __DIR__ . '/../../config/database.php';
 
-// Initialize Alert Variables
-$showPublicAlert = false;
-$alertLocationData = null;
+// // Initialize Alert Variables
+// $showPublicAlert = false;
+// $alertLocationData = null;
 
-// ==================================================================
-// 1. HIGH-RISK POPUP ALERTER (Applies to both Guest & Signed-In Public)
-// ==================================================================
-if (!isset($_SESSION['public_warning_dismissed'])) {
-    try {
-        // Look for high-risk analysis data updated within the last 14 days
-        $queryAlert = "
-            SELECT l.exact_location, l.state, a.erosion_risk, a.analysisid
-            FROM public.generated_analysis a
-            JOIN public.location l ON a.locationid = l.locationid
-            WHERE LOWER(a.erosion_risk) = 'high'
-              AND a.anaysis_update >= CURRENT_DATE - INTERVAL '14 days'
-            ORDER BY a.analysisid DESC 
-            LIMIT 1
-        ";
-        $stmtAlert = $pdo->prepare($queryAlert);
-        $stmtAlert->execute();
-        $alertLocationData = $stmtAlert->fetch(PDO::FETCH_ASSOC);
+// // ==================================================================
+// // 1. HIGH-RISK POPUP ALERTER (Applies to both Guest & Signed-In Public)
+// // ==================================================================
+// if (!isset($_SESSION['public_warning_dismissed'])) {
+//     try {
+//         // Look for high-risk analysis data updated within the last 14 days
+//         $queryAlert = "
+//             SELECT l.exact_location, l.state, a.erosion_risk, a.analysisid
+//             FROM public.generated_analysis a
+//             JOIN public.location l ON a.locationid = l.locationid
+//             WHERE LOWER(a.erosion_risk) = 'high'
+//               AND a.anaysis_update >= CURRENT_DATE - INTERVAL '14 days'
+//             ORDER BY a.analysisid DESC 
+//             LIMIT 1
+//         ";
+//         $stmtAlert = $pdo->prepare($queryAlert);
+//         $stmtAlert->execute();
+//         $alertLocationData = $stmtAlert->fetch(PDO::FETCH_ASSOC);
 
-        if ($alertLocationData) { 
-            $showPublicAlert = true; 
-        }
-    } catch (PDOException $e) {
-        error_log("Dashboard Alert Modal Error: " . $e->getMessage());
-    }
-}
+//         if ($alertLocationData) { 
+//             $showPublicAlert = true; 
+//         }
+//     } catch (PDOException $e) {
+//         error_log("Dashboard Alert Modal Error: " . $e->getMessage());
+//     }
+// }
 
 // ==================================================================
 // 2. MAIN CORE DATA QUERIES
@@ -104,7 +104,10 @@ try {
                     <p>Summary of erosion reports by location</p>
                 <?php endif; ?>
             </div>
-            
+            <div class="header-actions-wrapper">
+                <a href="/interface/dashboard/public.php" class="home-nav-btn">
+                    <i class="fas fa-home"></i> Home
+                </a>
             <?php if ($is_logged_in): ?>
                 <div class="user-profile-badge">
                     <i class="fas fa-user-check"></i> <span><?= ucfirst(htmlspecialchars($_SESSION['role_type'])) ?> Portal</span>
