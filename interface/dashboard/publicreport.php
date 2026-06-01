@@ -9,36 +9,7 @@ $username = $_SESSION['username'] ?? 'Guest';
 
 require_once __DIR__ . '/../../config/database.php';
 
-// // Initialize Alert Variables
-// $showPublicAlert = false;
-// $alertLocationData = null;
 
-// // ==================================================================
-// // 1. HIGH-RISK POPUP ALERTER (Applies to both Guest & Signed-In Public)
-// // ==================================================================
-// if (!isset($_SESSION['public_warning_dismissed'])) {
-//     try {
-//         // Look for high-risk analysis data updated within the last 14 days
-//         $queryAlert = "
-//             SELECT l.exact_location, l.state, a.erosion_risk, a.analysisid
-//             FROM public.generated_analysis a
-//             JOIN public.location l ON a.locationid = l.locationid
-//             WHERE LOWER(a.erosion_risk) = 'high'
-//               AND a.anaysis_update >= CURRENT_DATE - INTERVAL '14 days'
-//             ORDER BY a.analysisid DESC 
-//             LIMIT 1
-//         ";
-//         $stmtAlert = $pdo->prepare($queryAlert);
-//         $stmtAlert->execute();
-//         $alertLocationData = $stmtAlert->fetch(PDO::FETCH_ASSOC);
-
-//         if ($alertLocationData) { 
-//             $showPublicAlert = true; 
-//         }
-//     } catch (PDOException $e) {
-//         error_log("Dashboard Alert Modal Error: " . $e->getMessage());
-//     }
-// }
 
 // ==================================================================
 // 2. MAIN CORE DATA QUERIES
@@ -180,40 +151,8 @@ try {
             </tbody>
         </table>
     </div>
-            </main> <?php if ($showPublicAlert && $alertLocationData): ?>
-    <div id="risk-modal" class="warn-notification-overlay">
-        <div class="warn-notification-card">
-            <button id="dismiss-alert-x" class="warn-close-btn">&times;</button>
-            <div class="warn-card-accent-bar"></div>
-            <div class="warn-card-content">
-                <div class="warn-warning-header">
-                    <span class="warn-pulse-dot"></span>
-                    <h2>High-Risk Alert Location</h2>
-                </div>
-                <div class="warn-modal-body">
-                    <p class="warn-location-badge">📍 <?= htmlspecialchars($alertLocationData['exact_location']) ?>, <?= htmlspecialchars($alertLocationData['state']) ?></p>
-                    <p class="warn-warning-text">This high risk location was detected within the last 14 days. Please avoid this area for safety purposes.</p>
-                </div>
-                <div class="warn-action-footer">
-                    <a href="#status" class="warn-btn-primary">View Current Risk Status</a>
-                </div>
-            </div>
-        </div>
-    </div>   
-    <?php endif; ?>
-        <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const closeBtn = document.getElementById("dismiss-alert-x");
-        const modal = document.getElementById("risk-modal");
-        if (closeBtn && modal) {
-            closeBtn.addEventListener("click", () => {
-                modal.classList.add("warn-fade-out");
-                setTimeout(() => { modal.style.display = "none"; }, 250);
-                fetch("/interface/dashboard/warningpopup.php", { method: "POST" });
-            });
-        }
-    });
-    </script>
+
+
      <script>
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('main-content');

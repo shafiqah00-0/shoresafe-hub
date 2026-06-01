@@ -29,6 +29,7 @@ $lat = $_POST['latitude'] ?? null;
 $lng = $_POST['longitude'] ?? null;
 $description = $_POST['description'] ?? '';
 $reportDate = $_POST['date'] ?? date('Y-m-d');
+$district = $_POST['district'] ?? '';
 
 // --- 1. Handle File Upload Processing ---
 $imagePath = null;
@@ -78,10 +79,10 @@ try {
 
     // --- 2. Insert into the main location table ---
     $locStmt = $pdo->prepare("
-        INSERT INTO location (state, exact_location, latitude, longitude) 
+        INSERT INTO location (state, exact_location, latitude, longitude, district) 
         VALUES (?, ?, ?, ?)
     ");
-    $locStmt->execute([$state, $exactLoc, $lat, $lng]);
+    $locStmt->execute([$state, $exactLoc, $lat, $lng, $district]);
     
     // Grab the auto-incremented location primary key
     $locationID = $pdo->lastInsertId();
