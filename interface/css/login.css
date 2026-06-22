@@ -64,11 +64,11 @@ body.login-page {
    ========================================================================== */
 .main-content {
     display: flex;
-    justify-content: flex-end; /* Push card container to the right side */
+    justify-content: center; /* Push card container to the right side */
     align-items: center;
     height: 100vh;
     padding-top: 72px;         /* Creates safe clearance space for navigation bar */
-    padding-right: 15%;        /* Changed from 500px to percentage for better responsiveness */
+    padding-right: 0;        /* Changed from 500px to percentage for better responsiveness */
 }
 
 .login-card {

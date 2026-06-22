@@ -19,10 +19,10 @@ include("connect.php");
 $sql = "SELECT * FROM user WHERE
 username='".$_SESSION['username']."' AND
 password='".$_SESSION['password']."'";
-$result = mysqli_query($conn, $sql);
-$row = mysqli_num_rows($result);
+$result = pg_query($conn, $sql);
+$row = pg_num_rows($result);
 // Closes specified connection
-mysqli_close($conn);
+pg_close($conn);
 }
 else{
 echo "Login Fail";

@@ -1,13 +1,14 @@
-/* ===== GLOBAL ===== */
+/* ===== GLOBAL STYLES ===== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 body {
-    background: linear-gradient(to bottom, #eaf6ff, #ffffff);
+    /* Seamless, refreshing ultra-light coastal blue canvas */
+    background: linear-gradient(to bottom, #edf6f9, #f7fbfc, #ffffff);
     color: #1f2d3d;
     line-height: 1.6;
 }
@@ -21,14 +22,15 @@ body {
     font-weight: bold;
 }
 
-/* ===== HEADER ===== */
+/* ===== NAVIGATION HEADER ===== */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 50px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background: #ffffff;
+    /* Soft cyan/blue blended ambient shadow drops */
+    box-shadow: 0 4px 15px rgba(0, 119, 182, 0.04);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -66,7 +68,7 @@ nav a:hover {
     color: white !important;
 }
 
-/* ===== HERO (WAVE FIXED VERSION) ===== */
+/* ===== HERO SHOWCASE (WITH DYNAMIC LAYERS) ===== */
 .hero {
     height: 75vh;
     display: flex;
@@ -75,33 +77,41 @@ nav a:hover {
     text-align: center;
     position: relative;
     overflow: hidden;
-
-    /* ocean background */
-    background: linear-gradient(to top, #caf0f8, #ade8f4);
+    background: linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.22)), 
+                url('../head pantai.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-/* HERO CONTENT ABOVE WAVES */
+/* Hero Content Glassmorphism Card Frame */
 .hero-content {
     position: relative;
     z-index: 10;
-   
+    background: rgba(255, 255, 255, 0.16); 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 2.5rem 3rem;
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    max-width: 650px;
 }
 
 .hero h1 {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: black;
-    animation: slideIn 1s ease-out;
+    color: #ffffff; 
+    font-weight: 700;
 }
 
 .hero p {
     font-size: 1.2rem;
-    color: black;
-    opacity: 0.9;
-    animation: fadeIn 1.5s ease-out;
+    color: #ffffff; 
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    opacity: 0.95;
 }
 
-/* BUTTON */
 .hero-btn {
     margin-top: 20px;
     padding: 12px 25px;
@@ -111,53 +121,72 @@ nav a:hover {
     color: white;
     cursor: pointer;
     transition: 0.3s;
+    font-weight: 600;
 }
 
 .hero-btn:hover {
-    background: #023e8a;
+    background: #0096c7;
     transform: scale(1.05);
 }
 
-/* ===== WAVES ===== */
- .wave {
+/* ===== WAVES MARINE BLUE STRUCTS ===== */
+.wave {
     position: absolute;
     bottom: 0;
+    left: 0;
     width: 200%;
-    height: 120px;
-  background-repeat: repeat-x;
-    opacity: 0.6;
-} */
+    height: 80px; 
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,32L120,42.7C240,53,480,75,720,74.7C960,75,1200,53,1320,42.7L1440,32L1440,120L1320,120C1200,120,960,120,720,120C480,120,240,120,120,120L0,120Z' fill='%234ea8de'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 50% 100%;
+    transform: translate3d(0, 0, 0);
+}
 
-/* LAYER 1 */
+/* LAYER 1: Front wave (Deepest Blue) */
 .wave1 {
-    animation: waveMove 8s linear infinite;
-    z-index: 1;
-    bottom: 0;
+    animation: waveMove 10s linear infinite;
+    z-index: 5;
+    opacity: 1;
 }
 
-/* LAYER 2 */
+/* LAYER 2: Middle wave (Mid-tone Blue Accent) */
 .wave2 {
-    animation: waveMoveReverse 12s linear infinite;
-    opacity: 0.4;
-    bottom: 10px;
-    z-index: 2;
+    animation: waveMoveReverse 15s linear infinite;
+    opacity: 0.7;
+    z-index: 4;
+    bottom: 6px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,32L120,42.7C240,53,480,75,720,74.7C960,75,1200,53,1320,42.7L1440,32L1440,120L1320,120C1200,120,960,120,720,120C480,120,240,120,120,120L0,120Z' fill='%230077b6'/%3E%3C/svg%3E");
 }
 
-/* LAYER 3 */
+/* LAYER 3: Back wave (Soft Sky Blue Depth) */
 .wave3 {
-    animation: waveMove 16s linear infinite;
-    opacity: 0.3;
-    bottom: 20px;
+    animation: waveMove 22s linear infinite;
+    opacity: 0.4;
     z-index: 3;
+    bottom: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,32L120,42.7C240,53,480,75,720,74.7C960,75,1200,53,1320,42.7L1440,32L1440,120L1320,120C1200,120,960,120,720,120C480,120,240,120,120,120L0,120Z' fill='%2390e0ef'/%3E%3C/svg%3E");
 }
 
-/* ===== STATUS ===== */
+/* ===== KEYFRAME DECLARATIONS ===== */
+@keyframes waveMove {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+@keyframes waveMoveReverse {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+}
+
+/* ===== STATUS CARD BLOCKS ===== */
 .status {
     padding: 60px 20px;
     text-align: center;
 }
 
 .status h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0b1d2a;
     margin-bottom: 30px;
 }
 
@@ -169,23 +198,24 @@ nav a:hover {
 }
 
 .status-card {
-    width: 200px;
-    padding: 20px;
-    border-radius: 12px;
+    width: 220px;
+    padding: 25px 20px;
+    border-radius: 16px;
     color: white;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    transition: 0.3s;
+    box-shadow: 0 10px 25px rgba(0, 119, 182, 0.06);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
 }
 
 .status-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 119, 182, 0.15);
 }
 
 .high { background: #e63946; }
 .medium { background: #f4a261; }
 .low { background: #2a9d8f; }
 
-/* ===== INFO ===== */
+/* ===== DETAILS CONTAINERS & BOXES ===== */
 .info, .about, .cta {
     padding: 60px 20px;
     text-align: center;
@@ -194,73 +224,63 @@ nav a:hover {
 .info-box {
     max-width: 600px;
     margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    /* Soft micro blue tint container box shadow */
+    box-shadow: 0 10px 30px rgba(0, 119, 182, 0.03);
     text-align: left;
+    border: 1px solid rgba(144, 224, 239, 0.25);
 }
 
-/* ===== MAP ===== */
+/* ===== LEAFLET GEOSPATIAL INTERACTION AREA ===== */
 .map-section {
-    padding: 60px 20px;
+    padding: 40px 20px 60px 20px;
     text-align: center;
 }
 
 #map {
-    height: 450px;
+    height: 470px;
     width: 90%;
+    max-width: 1200px;
     margin: 20px auto;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 119, 182, 0.08);
+    border: 1px solid rgba(144, 224, 239, 0.3);
 }
 
-/* ===== CTA ===== */
+/* ===== MARKETING CALL TO ACTION BUTTON ===== */
 .cta {
     background: #0077b6;
     color: white;
+    padding: 80px 20px;
 }
 
 .btn-big {
     display: inline-block;
-    margin-top: 15px;
-    padding: 12px 25px;
+    margin-top: 20px;
+    padding: 14px 32px;
     background: #ff6b35;
     color: white;
     text-decoration: none;
-    border-radius: 10px;
-    font-weight: bold;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
     transition: 0.3s;
 }
 
 .btn-big:hover {
     background: #ff814d;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.45);
 }
 
-/* ===== FOOTER ===== */
+/* ===== APPLICATION SYSTEM FOOTER ===== */
 footer {
     text-align: center;
-    padding: 20px;
+    padding: 30px 20px;
     background: #0b1d2a;
-    color: white;
-    margin-top: 40px;
-}
-
-/* ===== ANIMATIONS ===== */
-@keyframes waveMove {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
-}
-
-@keyframes waveMoveReverse {
-    0% {
-        transform: translateX(-50%);
-    }
-    100% {
-        transform: translateX(0);
-    }
+    color: #a0aec0;
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
 }

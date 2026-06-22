@@ -34,7 +34,6 @@ $district = $_POST['district'] ?? '';
 // --- 1. Handle File Upload Processing ---
 $imagePath = null;
 $newFileName = null;
-// Use clean directory separator routing
 $uploadFileDir = __DIR__ . '/../../uploads/reports/'; 
 
 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -43,7 +42,6 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     
     $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     
-    // Validate image types explicitly to keep your directory clean and safe
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     if (!in_array($fileExtension, $allowedExtensions)) {
         echo json_encode([
@@ -62,7 +60,6 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     $dest_path = $uploadFileDir . $newFileName;
     
     if (move_uploaded_file($fileTmpPath, $dest_path)) {
-        // Keeps path system web-friendly for frontend rendering
         $imagePath =  $newFileName;
     } else {
         echo json_encode([
@@ -80,7 +77,7 @@ try {
     // --- 2. Insert into the main location table ---
     $locStmt = $pdo->prepare("
         INSERT INTO location (state, exact_location, latitude, longitude, district) 
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
     ");
     $locStmt->execute([$state, $exactLoc, $lat, $lng, $district]);
     
@@ -105,9 +102,10 @@ try {
             description,
             report_date,
             guest_session,
-            authoritiesid
+            authoritiesid,
+            analysisid
         )
-        VALUES (?, ?, NOW(), ?, ?, ?, ?)
+        VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)
     ");
 
     $stmt->execute([
@@ -116,9 +114,53 @@ try {
         $description,
         $reportDate,
         $guestSession,
-        null
+        null, // authoritiesid
+        null  // analysisid
     ]);
 
+    // Grab the new report's primary key (useful for audit mapping)
+    $reportID = $pdo->lastInsertId();
+
+// --- 5. AUTOMATED AUDIT LOGGING ---
+    // Safely capture user IP address handling reverse proxies or local environments
+    $ipAddress = $_SERVER['HTTP_CLIENT_IP'] 
+                 ?? $_SERVER['HTTP_X_FORWARDED_FOR'] 
+                 ?? $_SERVER['REMOTE_ADDR'] 
+                 ?? '0.0.0.0';
+
+    if (strpos($ipAddress, ',') !== false) {
+        $ipAddress = trim(explode(',', $ipAddress)[0]);
+    }
+
+    // Structure the metadata to match your exact "new_values" JSON layout
+    $payloadData = [
+        'analysisid'    => null, 
+        'locationid'    => (int)$locationID,
+        'description'   => $description,
+        'authoritiesid' => null, 
+        'guest_session' => $guestSession
+    ];
+
+    // Prepared statement matching your exact database columns from image_17d98d.png
+    $auditStmt = $pdo->prepare("
+        INSERT INTO audit_logs (
+            userid, 
+            actiondo, 
+            auditable_type, 
+            auditable_id, 
+            new_values, 
+            ip_address, 
+            created_at
+        ) 
+        VALUES (?, 'CREATE', 'Report', ?, ?, ?, NOW())
+    ");
+
+    $auditStmt->execute([
+        $userID ?? 'GUEST',
+        $reportID, // Goes into auditable_id
+        json_encode($payloadData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), // Goes into new_values
+        $ipAddress
+    ]);
     // Commit changes simultaneously if everything passes rules above
     $pdo->commit();
 

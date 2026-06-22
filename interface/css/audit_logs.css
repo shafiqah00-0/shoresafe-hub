@@ -1,0 +1,182 @@
+/* Audit Dashboard Specific Styling Overrides */
+.filter-card {
+    background: #fff; 
+    padding: 1.25rem; 
+    border-radius: 12px; 
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+    display: flex; 
+    gap: 1rem; 
+    align-items: center;
+}
+
+.filter-card select, .filter-card button {
+    padding: 0.6rem 1rem; 
+    border-radius: 8px; 
+    border: 1px solid #e2e8f0; 
+    font-family: inherit; 
+    font-size: 0.9rem;
+}
+
+.filter-card button { 
+    background: #3182ce; 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    font-weight: 500; 
+}
+
+.filter-card button:hover { 
+    background: #2b6cb0; 
+}
+
+.table-container {
+    background: #fff; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.audit-table { 
+    width: 100%; 
+    table-layout: auto;
+    border-collapse: collapse; 
+    text-align: left; 
+    font-size: 0.9rem; 
+}
+
+.audit-table th, .audit-table td { 
+    padding: 0.75rem 0.5rem; /* Top/Bottom 0.75rem, Left/Right 0.5rem */
+    border-bottom: 1px solid #edf2f7; 
+    color: #2d3748; 
+    vertical-align: middle; 
+}
+
+.audit-table th:nth-child(6), 
+.audit-table td:nth-child(6),
+.audit-table th:nth-child(7), 
+.audit-table td:nth-child(7) {
+    width: 120px; /* Force a specific narrow width */
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+    text-align: center;
+}
+
+.badge { 
+    padding: 0.25rem 0.6rem; 
+    border-radius: 50px; 
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    display: inline-block; 
+}
+
+.badge-create { background: #c6f6d5; color: #22543d; }
+.badge-update { background: #feebc8; color: #744210; }
+.badge-delete { background: #fed7d7; color: #742a2a; }
+
+.btn-view { 
+    background: #edf2f7; 
+    border: none; 
+    padding: 0.25rem 0.5rem; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    color: #4a5568; 
+    font-size: 0.75rem; 
+    font-weight: 600; 
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem
+}
+
+.btn-view:hover { 
+    background: #e2e8f0; 
+    color: #2d3748; 
+}
+
+.pagination { 
+    margin-top: 1.5rem; 
+    display: flex; 
+    gap: 0.5rem; 
+    justify-content: flex-end; 
+}
+
+.pagination a { 
+    padding: 0.5rem 0.75rem; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 6px; 
+    text-decoration: none; 
+    color: #4a5568; 
+    font-size: 0.85rem; 
+}
+
+.pagination a.active { 
+    background: #3182ce; 
+    color: white; 
+    border-color: #3182ce; 
+}
+
+/* JSON Details Modal Styling */
+.modal-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.4); 
+    display: none; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 1000; 
+}
+
+.modal-card { 
+    background: white; 
+    width: 600px; 
+    max-width: 90%; 
+    border-radius: 12px; 
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
+    overflow: hidden; 
+    animation: slideIn 0.2s ease-out; 
+}
+
+.modal-header { 
+    padding: 1.25rem; 
+    background: #f7fafc; 
+    border-bottom: 1px solid #edf2f7; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+
+.modal-body { 
+    padding: 1.5rem; 
+    max-height: 400px; 
+    overflow-y: auto; 
+    font-family: monospace; 
+    background: #1a202c; 
+    color: #a0aec0; 
+    border-radius: 0 0 12px 12px; 
+}
+
+.close-modal { 
+    font-size: 1.5rem; 
+    border: none; 
+    background: transparent; 
+    cursor: pointer; 
+    color: #a0aec0; 
+}
+
+.close-modal:hover { color: #4a5568; }
+
+pre { 
+    margin: 0; 
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+}
+
+@keyframes slideIn { 
+    from { transform: translateY(15px); opacity: 0; } 
+    to { transform: translateY(0); opacity: 1; } 
+}

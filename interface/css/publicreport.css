@@ -144,3 +144,41 @@ body {
             color: #ffffff !important;
             transform: translateY(-1px);
 }
+        .beach-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .beach-modal-overlay.active {
+            opacity: 1; pointer-events: auto;
+        }
+        .beach-modal-card {
+            background: #ffffff;
+            width: 90%; max-width: 450px;
+            border-radius: 16px; padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            transform: translateY(-20px);
+            transition: transform 0.2s ease;
+        }
+        .beach-modal-overlay.active .beach-modal-card {
+            transform: translateY(0);
+        }
+        .beach-modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem; border-bottom: 1px solid #edf2f7; padding-bottom: 0.75rem;
+        }
+        .beach-modal-header h3 { margin: 0; color: #2d3748; font-size: 1.2rem; }
+        .beach-close-btn {
+            background: none; border: none; font-size: 1.25rem; color: #a0aec0; cursor: pointer;
+        }
+        .beach-close-btn:hover { color: #e53e3e; }
+        .beach-list-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 0.75rem; background: #f7fafc;
+            border-radius: 8px; margin-bottom: 0.5rem; color: #4a5568; font-weight: 500;
+        }

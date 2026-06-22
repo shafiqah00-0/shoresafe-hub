@@ -218,6 +218,12 @@ locationData.forEach(function(place) {
     <p>© 2026 ShoreSafe | Coastal Erosion Management System</p>
 </footer>
 <!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+var map = L.map('map').setView([4.5000, 102.2500], 7);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+</script>
 </body>
 </html>

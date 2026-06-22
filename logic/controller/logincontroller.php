@@ -32,26 +32,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([':username' => $username]);
         $user = $stmt->fetch();
 
-        // TEMP: plain password check (you can upgrade later)
-        // Replace your old plain check with this smart check:
-            if ($user && (password_verify($password, $user['password']) || $password === $user['password'])) { 
+        if ($user && (password_verify($password, $user['password']) || $password === $user['password'])) { 
+
+            // --- STATUS GATEKEEPER CHECK ---
+            if (isset($user['status']) && $user['status'] !== 'active') {
+                $response['message'] = 'Your account is currently under review by an administrator. Please login back after 24 hour registration.';
+                echo json_encode($response);
+                exit();
+            }
+            // --- END STATUS GATEKEEPER ---
 
             $_SESSION['userid'] = $user['userid'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role_type'] = $user['role_type'];
 
+            // --- AUTOMATED AUDIT LOGGING: LOGIN ---
+            $ipAddress = $_SERVER['HTTP_CLIENT_IP'] 
+                         ?? $_SERVER['HTTP_X_FORWARDED_FOR'] 
+                         ?? $_SERVER['REMOTE_ADDR'] 
+                         ?? '0.0.0.0';
+
+            if (strpos($ipAddress, ',') !== false) {
+                $ipAddress = trim(explode(',', $ipAddress)[0]);
+            }
+
+            // Capture context values into new_values JSON column
+            $payloadData = [
+                'username'  => $user['username'],
+                'role_type' => $user['role_type'],
+                'status'    => 'success'
+            ];
+
+            $auditStmt = $pdo->prepare("
+                INSERT INTO audit_logs (
+                    userid, 
+                    actiondo, 
+                    auditable_type, 
+                    auditable_id, 
+                    new_values, 
+                    ip_address, 
+                    created_at
+                ) 
+                VALUES (?, 'LOGIN', 'UserSession', ?, ?, ?, NOW())
+            ");
+
+            $auditStmt->execute([
+                $user['userid'],
+                $user['id'] ?? 0, // Use user numerical table index for auditable_id if it exists
+                json_encode($payloadData),
+                $ipAddress
+            ]);
+            // --- END AUDIT LOGGING ---
+
             $response['success'] = true;
             if ($user['role_type'] === 'admin') {
-             $response['redirect'] = '/interface/admin-dashboard.php';
+                $response['redirect'] = '/interface/dashboard/admin.php';
             } elseif ($user['role_type'] === 'authorities') {
                  $response['redirect'] = '/interface/dashboard/authorities.php';
             } elseif ($user['role_type'] === 'stakeholders') {
                  $response['redirect'] = '/interface/dashboard/stakeholders.php';
             } else {
-            // Default fallback (e.g., for general users or guests)
-            $response['redirect'] = '/interface/dashboard/public.php';
+                $response['redirect'] = '/interface/dashboard/public.php';
             }
-            
 
         } else {
             $response['message'] = 'Invalid username/email or password';

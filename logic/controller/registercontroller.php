@@ -45,22 +45,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode($response);
             exit;
         }
+        // Explicitly determine status based on role_type
+        if ($user_type === 'public') {
+    $status = 'active';
+        } elseif ($user_type === 'authorities' || $user_type === 'stakeholders') {
+    $status = 'pending';
+} else {
+    // Fallback if someone sends a weird user_type
+    $status = 'pending'; 
+}
 
         // insert user
         $hashed = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $pdo->prepare("
-            INSERT INTO users (username, email, password, full_name, role_type)
-            VALUES (?, ?, ?, ?, ?)
-        ");
+    INSERT INTO users (username, email, password, full_name, role_type, reg_number, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+");
 
-        $stmt->execute([
-            $username,
-            $email,
-            $hashed,
-            $full_name,
-            $user_type
-        ]);
+$stmt->execute([
+    $username,
+    $email,
+    $hashed,
+    $full_name,
+    $user_type,
+    $_POST['reg_number'] ?? null, // Capture the reg_number from the form
+    $status                       // Save the determined status
+]);
 
         $response['success'] = true;
         $response['message'] = "Registration successful!";

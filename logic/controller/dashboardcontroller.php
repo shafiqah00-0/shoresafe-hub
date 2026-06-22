@@ -16,8 +16,6 @@ class DashboardController {
         $username = $_SESSION['username'] ?? 'Guest';
         $role = $_SESSION['role_type'] ?? 'public';
 
-        // 📊 Example DB data (replace later)
-        $total_reports = 120;
 
         // 🧠 Pass data to view (IMPORTANT)
         require __DIR__ . '/../dashboard/public.php';

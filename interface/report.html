@@ -27,8 +27,8 @@
 
     <form id="reportForm" enctype="multipart/form-data">
         <p class="map-hint">
-        📍 Please click on the map to select your location.  
-        The state and exact shoreline location will be filled in automatically.
+        📍Click on the map or insert name on the exact location to
+          insert this form.
         </p>
         <div id="map"></div>
 
@@ -44,10 +44,10 @@
         <input type="text" name="state" id="state" readonly required>
 
         <label>District:</label>
-        <input type="text" name="state" id="district" readonly required>
+        <input type="text" name="district" id="district" readonly required>
         
         <label>Exact Shoreline Location:</label>
-        <input type="text" name="exact_location" id="location" readonly required>
+        <input type="text" name="exact_location" id="location" placeholder = "Example = Pantai Klebang" required>
 
         <label>Date of Observation:</label>
         <input type="date" name="date" id="reportDate" required value="<?= date('Y-m-d'); ?>">
@@ -71,47 +71,34 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-    // 1. Initialize Map
-    var map = L.map('map').setView([4.2105, 101.9758], 6); // Centered on Malaysia
+// 1. Initialize Map
+var map = L.map('map').setView([4.2105, 101.9758], 6); // Centered on Malaysia
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-   let marker;
-    let firstClick = true;
+let marker;
+let firstClick = true;
 
-    map.on('click', function (e) {
+// DOM Element Anchors
+const stateInput = document.getElementById("state");
+const districtInput = document.getElementById("district");
+const locationInput = document.getElementById("location");
+const latInput = document.getElementById("latitude");
+const lngInput = document.getElementById("longitude");
 
-    const { lat, lng } = e.latlng;
+// Helper function to update form fields via Reverse Geocoding (Coordinates -> Text)
+function updateFormFromCoords(lat, lng) {
+    latInput.value = lat.toFixed(8);
+    lngInput.value = lng.toFixed(8);
 
-    // ✅ First-click guide popup
-    if (firstClick) {
-        L.popup()
-            .setLatLng(e.latlng)
-            .setContent("✔ Location selected!<br>State and exact shoreline location will be auto-filled.")
-            .openOn(map);
-
-        firstClick = false;
-    }
-
-    // Marker handling
-    if (!marker) {
-        marker = L.marker([lat, lng]).addTo(map);
-    } else {
-        marker.setLatLng([lat, lng]);
-    }
-
-    // Store coordinates
-    document.getElementById("latitude").value = lat;
-    document.getElementById("longitude").value = lng;
-
-    // Reverse geocoding
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
         .then(res => res.json())
         .then(data => {
             const addr = data.address;
             const state = addr.state || addr.region || "Unknown State";
+            const district = addr.district || addr.county || addr.municipality || "Unknown District";
 
             const beach = addr.beach || addr.suburb || addr.village || "";
             const road = addr.road || "";
@@ -119,51 +106,116 @@
             const exactLocation = [beach, road].filter(Boolean).join(", ")
                 || "Coastal Point (" + lat.toFixed(4) + ")";
 
-            document.getElementById("state").value = state;
-            document.getElementById("location").value = exactLocation;
+            stateInput.value = state;
+            districtInput.value = district;
+            locationInput.value = exactLocation;
         })
         .catch(err => console.error("Geocoding error:", err));
-    });
+}
 
-    // 3. Form Submission logic
-    document.getElementById('reportForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const btn = document.getElementById('submitBtn');
-        const msg = document.getElementById('responseMsg');
-        
-        // Visual Feedback
-        btn.innerText = "Sending...";
-        btn.classList.add('loading');
-        msg.innerText = "";
+// OPTION A: User clicks or taps directly on the map surface
+map.on('click', function (e) {
+    const { lat, lng } = e.latlng;
 
-        const formData = new FormData(this);
+    if (firstClick) {
+        L.popup()
+            .setLatLng(e.latlng)
+            .setContent("✔ Location selected!.")
+            .openOn(map);
+        firstClick = false;
+    }
+
+    if (!marker) {
+        marker = L.marker([lat, lng]).addTo(map);
+    } else {
+        marker.setLatLng([lat, lng]);
+    }
+
+    updateFormFromCoords(lat, lng);
+});
+
+// OPTION B: User types location string manually (Text -> Coordinates/Map Sync)
+let typingTimer;
+locationInput.addEventListener('input', function () {
+    clearTimeout(typingTimer);
+    const query = locationInput.value;
+
+    if (query.length < 3) return; // Wait until they type a meaningful word
+
+    // Debounce: Wait 800ms after typing stops before calling the API
+    typingTimer = setTimeout(() => {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+
+                    // Move map smoothly and snap marker position
+                    map.flyTo([lat, lon], 13);
+                    if (!marker) {
+                        marker = L.marker([lat, lon]).addTo(map);
+                    } else {
+                        marker.setLatLng([lat, lon]);
+                    }
+
+                    // Update inputs
+                    latInput.value = lat.toFixed(8);
+                    lngInput.value = lon.toFixed(8);
+
+                    // Use reverse geocoding on the resulting coordinates to reliably isolate official State/District values
+                    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+                        .then(res => res.json())
+                        .then(reverseData => {
+                            const addr = reverseData.address;
+                            stateInput.value = addr.state || addr.region || "Unknown State";
+                            districtInput.value = addr.district || addr.county || addr.municipality || "Unknown District";
+                        });
+                }
+            })
+            .catch(err => console.error("Search error:", err));
+    }, 800);
+});
+
+// 3. Form Submission logic
+document.getElementById('reportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const btn = document.getElementById('submitBtn');
+    const msg = document.getElementById('responseMsg');
+    
+    btn.innerText = "Sending...";
+    btn.classList.add('loading');
+    msg.innerText = "";
+
+    const formData = new FormData(this);
+    
+    fetch('../logic/controller/reportcontroller.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.innerText = "Submit Report";
+        btn.classList.remove('loading');
         
-        fetch('../logic/controller/reportcontroller.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            btn.innerText = "Submit Report";
-            btn.classList.remove('loading');
-            
-            msg.innerText = data.message;
-            msg.style.color = data.success ? "green" : "red";
-            
-            if(data.success) {
-                this.reset();
-                if(marker) map.removeLayer(marker);
-            }
-        })
-        .catch(err => {
-            btn.innerText = "Submit Report";
-            btn.classList.remove('loading');
-            msg.innerText = "Connection Error. Please try again.";
-            msg.style.color = "red";
-            console.error("Error:", err);
-        });
+        msg.innerText = data.message;
+        msg.style.color = data.success ? "green" : "red";
+        
+        if(data.success) {
+            this.reset();
+            if(marker) map.removeLayer(marker);
+            firstClick = true;
+        }
+    })
+    .catch(err => {
+        btn.innerText = "Submit Report";
+        btn.classList.remove('loading');
+        msg.innerText = "Connection Error. Please try again.";
+        msg.style.color = "red";
+        console.error("Error:", err);
     });
+});
 </script>
 </body>
 </html>

@@ -168,16 +168,30 @@ document.getElementById('forgotForm').addEventListener('submit', async function(
 // MAIN LOGIN FORM SUBMISSION ACTION
 document.getElementById("loginForm").addEventListener("submit", async function(e) {
     e.preventDefault();
+    
+    // Get a reference to your display area (or create a new div for it)
+    // For now, I'll use a standard alert for speed, but you can target a div
+    const formData = new FormData(this);
+    
     try {
         const response = await fetch("/logic/controller/logincontroller.php", {
             method: "POST",
-            body: new FormData(this)
+            body: formData
         });
         const data = await response.json();
+        
         if (data.success) {
             window.location.href = data.redirect;
         } else {
-            alert(data.message);
+            // Check if it's the pending message
+            if (data.message.includes('under review')) {
+                // Show a "Neutral/Info" message (Orange/Yellow)
+                alert("NOTICE: " + data.message); 
+                // Suggestion: Swap this for a non-blocking UI element in the future
+            } else {
+                // Show a "Danger" message (Red)
+                alert("ERROR: " + data.message);
+            }
         }
     } catch (error) {
         alert("Server communication error.");

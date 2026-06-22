@@ -8,13 +8,13 @@ $addr = $_POST['address'];
 $sql = "UPDATE user SET name='".$name."', ic='".$ic."',
 address='".$addr."' WHERE
 username='".$_SESSION['username']."'";
-if (mysqli_query($conn, $sql)) {
+if (pg_query($conn, $sql)) {
  echo "Record updated successfully";
 } else {
- echo "Error updating record: " . mysqli_error($conn);
+ echo "Error updating record: " . pg_last_error($conn);
 }
 //Closes specified connection
-mysqli_close($conn);
+pg_close($conn);
 ?>
 <html>
 <body>

@@ -2,135 +2,81 @@
 session_start();
 require_once __DIR__ . '/../../config/database.php';
 
+// 1. Security Check: Only authorities can proceed
+if (!isset($_SESSION['role_type']) || $_SESSION['role_type'] !== 'authorities') {
+    die("Access Denied: Only authorities can perform this action.");
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Both operations require the location ID
     $locationid = $_POST['locationid'] ?? null; 
-    
-    // Check if the form submission is for an 'update' or a 'delete' action
-    $action = $_POST['action'] ?? 'update'; 
+    $action     = $_POST['action'] ?? 'update'; 
 
     if (!$locationid) {
         die("Error: Location ID is required.");
     }
 
     // =======================================================
-    // 🗑️ WORKFLOW A: DELETE OPERATION (CRUD - Delete)
+    // 🗑️ WORKFLOW A: DELETE OPERATION
     // =======================================================
     if ($action === 'delete') {
         try {
             $pdo->beginTransaction();
-
-            // Step 1: Delete from child/dependent tables first to prevent Foreign Key constraint violations
-            $sqlDeleteImg = "DELETE FROM image_loc WHERE locationid = :locid";
-            $stmtImg = $pdo->prepare($sqlDeleteImg);
-            $stmtImg->execute(['locid' => $locationid]);
-
-            $sqlDeleteAnalysis = "DELETE FROM generated_analysis WHERE locationid = :locid";
-            $stmtAnalysis = $pdo->prepare($sqlDeleteAnalysis);
-            $stmtAnalysis->execute(['locid' => $locationid]);
-
-            $sqlDeleteReport = "DELETE FROM report WHERE locationid = :locid";
-            $stmtReport = $pdo->prepare($sqlDeleteReport);
-            $stmtReport->execute(['locid' => $locationid]);
-
-            // Step 2: Delete the physical parent record from the location table last
-            $sqlDeleteLoc = "DELETE FROM location WHERE locationid = :locid";
-            $stmtLoc = $pdo->prepare($sqlDeleteLoc);
-            $stmtLoc->execute(['locid' => $locationid]);
-
+            $pdo->prepare("DELETE FROM image_loc WHERE locationid = ?")->execute([$locationid]);
+            $pdo->prepare("DELETE FROM generated_analysis WHERE locationid = ?")->execute([$locationid]);
+            $pdo->prepare("DELETE FROM report WHERE locationid = ?")->execute([$locationid]);
+            $pdo->prepare("DELETE FROM location WHERE locationid = ?")->execute([$locationid]);
             $pdo->commit();
             header("Location: /logic/controller/managereport.php");
             exit();
-
         } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            die("Error deleting report: " . $e->getMessage());
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            die("Error deleting: " . $e->getMessage());
         }
     }
 
     // =======================================================
-    // 📝 WORKFLOW B: UPDATE OPERATION (CRUD - Update)
+    // 📝 WORKFLOW B: UPDATE OPERATION (Location-Specific)
     // =======================================================
-    else if ($action === 'update') {
-        // Collect update form data
-        $status_update = $_POST['status_update'] ?? null;
-        $erosion_risk  = $_POST['erosion_risk'] ?? null; // For generated_analysis
-        $action_taken  = $_POST['action_taken'] ?? null;
-        
-        // Optional attributes for your analytical module
-        $suitability_score = $_POST['suitability_score'] ?? null; 
-        $prediction_memo   = $_POST['prediction_memo'] ?? null;  
+// =======================================================
+// 📝 WORKFLOW B: UPDATE OPERATION (Always Create New)
+// =======================================================
+else if ($action === 'update') {
+    $status_update = $_POST['status_update'] ?? null;
+    $erosion_risk  = $_POST['erosion_risk'] ?? null; 
+    $action_taken  = $_POST['action_taken'] ?? null;
+    $suitability_score = $_POST['suitability_score'] ?? null; 
+    $prediction_memo   = $_POST['prediction_memo'] ?? null;
+    
+    if (!$status_update || !$action_taken || !$erosion_risk) {
+        die("Error: Missing required fields.");
+    }
 
-        if (!$status_update || !$action_taken || !$erosion_risk) {
-            die("Error: Missing required form fields for update execution.");
-        }
+  try {
+        $pdo->beginTransaction();
 
-        try {
-            $pdo->beginTransaction();
+        // 1. Always insert a new Authority status record
+        $stmtAuth = $pdo->prepare("INSERT INTO action_authorities (status_update, action_taken) VALUES (?, ?)");
+        $stmtAuth->execute([$status_update, $action_taken]);
+        $newAuthID = $pdo->lastInsertId();
 
-            // Step 1: Insert the operational action into the authorities table
-            $sqlAuth = "INSERT INTO authorities (status_update, action_taken) 
-                        VALUES (:status, :action) RETURNING authoritiesid";
-            
-            $stmtAuth = $pdo->prepare($sqlAuth);
-            $stmtAuth->execute([
-                'status' => $status_update,
-                'action' => $action_taken
-            ]);
-            
-            // Get the ID generated by SERIAL
-            $newAuthID = $stmtAuth->fetchColumn();
+        // 2. Always insert a new Analysis record (This keeps your prediction memo unique to this update)
+        $sqlAnalysis = "INSERT INTO generated_analysis (locationid, erosion_risk, suitability_score, prediction_memo, anaysis_update) 
+                        VALUES (?, ?, ?, ?, NOW())";
+        $stmtAnalysis = $pdo->prepare($sqlAnalysis);
+        $stmtAnalysis->execute([$locationid, $erosion_risk, $suitability_score, $prediction_memo]);
+        $newAnalysisID = $pdo->lastInsertId();
 
-            // Step 2: Link the report row to this new authority action
-            $sqlReport = "UPDATE report 
-                          SET authoritiesid = :authid 
-                          WHERE locationid = :locid";
-            
-            $stmtReport = $pdo->prepare($sqlReport);
-            $stmtReport->execute([
-                'authid' => $newAuthID,
-                'locid'  => $locationid
-            ]);
+        // 3. Link the report to these new, unique IDs
+        $stmtLink = $pdo->prepare("UPDATE report SET authoritiesid = ?, analysisid = ? WHERE locationid = ?");
+        $stmtLink->execute([$newAuthID, $newAnalysisID, $locationid]);
 
-            // Step 3: Manage the scientific metrics inside the new generated_analysis table (Upsert logic)
-            $sqlCheck = "SELECT analysisid FROM generated_analysis WHERE locationid = :locid";
-            $stmtCheck = $pdo->prepare($sqlCheck);
-            $stmtCheck->execute(['locid' => $locationid]);
-            $existingAnalysisID = $stmtCheck->fetchColumn();
-
-            if ($existingAnalysisID) {
-                // Update existing analysis parameters
-                $sqlAnalysis = "UPDATE generated_analysis 
-                                SET erosion_risk = :risk, 
-                                    suitability_score = :suit, 
-                                    prediction_memo = :memo,
-                                    anaysis_update = NOW() 
-                                WHERE locationid = :locid";
-            } else {
-                // Insert brand new analytical calculation profile
-                $sqlAnalysis = "INSERT INTO generated_analysis (locationid, erosion_risk, suitability_score, prediction_memo) 
-                                VALUES (:locid, :risk, :suit, :memo)";
-            }
-
-            $stmtAnalysis = $pdo->prepare($sqlAnalysis);
-            $stmtAnalysis->execute([
-                'locid' => $locationid,
-                'risk'  => $erosion_risk,
-                'suit'  => $suitability_score,
-                'memo'  => $prediction_memo
-            ]);
-
-            $pdo->commit();
-            header("Location: /logic/controller/managereport.php");
-            exit();
-
-        } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            die("Error updating report: " . $e->getMessage());
-        }
+        $pdo->commit();
+        header("Location: /logic/controller/managereport.php");
+        exit();
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        die("Error: " . $e->getMessage());
     }
 }
+}
+?>

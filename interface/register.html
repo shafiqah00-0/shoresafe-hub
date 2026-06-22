@@ -51,13 +51,18 @@
                 <!-- User Type (Mapped to your PHP $user_type) -->
              <div class="form-group">
                 <i class="fa-solid fa-user-tag"></i>
-                <select name="user_type" required>
+                <select name="user_type" id="userType" required onchange="updateFormFields()">
                     <option value="" disabled selected>Select</option> 
                     <option value="public">Public User</option>
-                    <option value="authority">Authority</option>
+                    <option value="authorities">Authority</option>
                     <option value="stakeholders">Stakeholder</option>
                 </select>
+
             </div>
+            
+           <div class="form-group" id="regField" style="display:none;">
+            <i class="fa-solid fa-id-badge"></i> <input type="text" id="regInput" name="reg_number" placeholder="Registration Number">
+                </div>
 
                 <!-- Password -->
                 <div class="form-group">
@@ -171,6 +176,25 @@
                 submitBtn.innerText = "Register Now";
             }
         });
+        function updateFormFields() {
+    const userType = document.getElementById('userType').value;
+    const regField = document.getElementById('regField');
+    const regInput = document.getElementById('regInput');
+
+    if (userType === 'authorities') {
+        regField.style.display = 'block';
+        regInput.placeholder = "Authority ID";
+        regInput.required = true;
+    } else if (userType === 'stakeholders') {
+        regField.style.display = 'block';
+        regInput.placeholder = "Official Registered Number";
+        regInput.required = true;
+    } else {
+        // For 'public' or default
+        regField.style.display = 'none';
+        regInput.required = false;
+    }
+}
     </script>
 </body>
 </html>

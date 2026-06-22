@@ -15,7 +15,7 @@ echo "New record created successfully <br>";
 echo "Error: " . $sql . "<br>" . pg_last_error($conn);
 }
 //Closes specified connection
-mysqli_close($conn);
+pg_close($conn);
 ?>
 <html>
 <body>

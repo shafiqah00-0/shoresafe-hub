@@ -1,3 +1,8 @@
+/* ==========================================================================
+   SHORESAFE UNIFIED SYSTEM STYLESHEET (STAKEHOLDERS, AUTHORITIES, PUBLIC)
+   ========================================================================== */
+
+/* --- CORE DESIGN SYSTEM TOKENS --- */
 :root {
     --primary: #2563eb;
     --primary-light: #dbeafe;
@@ -6,13 +11,39 @@
     --text-muted: #64748b;
     --bg-body: #f1f5f9;
     --sidebar-width: 280px;
+    --sidebar-collapsed: 80px;
+    --transition-speed: 0.4s;
+    --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Risk Spectrum Tokens */
+    --danger: #e53e3e;
+    --danger-bg: #fff5f5;
+    --danger-border: #fed7d7;
+    --danger-dark: #9b2c2c;
+    --warning: #dd6b20;
+    --success: #38a169;
+    --primary-geo: #0077b6;
+    --info: #4299e1;
+    --purple: #805ad5;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+/* --- ROOT ELEMENT RESET --- */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; 
+}
 
-body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; }
+body { 
+    background-color: var(--bg-body); 
+    color: var(--text-main); 
+    display: flex; 
+    min-height: 100vh; 
+    overflow-x: hidden;
+}
 
-/* Enhanced Sidebar */
+/* --- ENHANCED SIDEBAR FLUID GRID SYSTEM --- */
 .sidebar {
     width: var(--sidebar-width);
     background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
@@ -21,116 +52,65 @@ body { background-color: var(--bg-body); color: var(--text-main); display: flex;
     position: fixed;
     height: 100vh;
     box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transition: width var(--transition-speed) var(--transition-curve), 
+                padding var(--transition-speed) var(--transition-curve);
 }
 
 .sidebar .logo { 
-    font-size: 1.6rem; font-weight: 800; margin-bottom: 3rem; 
-    display: flex; align-items: center; gap: 12px; color: #38bdf8;
+    font-size: 1.6rem; 
+    font-weight: 800; 
+    margin-bottom: 3rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    color: #38bdf8;
+    white-space: nowrap;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 5rem);
 }
 
 .sidebar nav a {
-    display: flex; align-items: center; gap: 12px;
-    color: #94a3b8; text-decoration: none;
-    padding: 0.9rem 1.2rem; margin-bottom: 0.6rem;
-    border-radius: 12px; transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #94a3b8; 
+    text-decoration: none;
+    padding: 0.9rem 1.2rem; 
+    margin-bottom: 0.6rem;
+    border-radius: 12px; 
+    transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
-.sidebar nav a i { font-size: 1.1rem; }
-
-.sidebar nav a:hover, .sidebar nav a.active { 
-    background: rgba(56, 189, 248, 0.1); color: #38bdf8; 
+.sidebar nav a i { 
+    font-size: 1.1rem; 
+    width: 20px;
+    text-align: center;
 }
 
-.sidebar nav a.active { background: #38bdf8; color: #0f172a; font-weight: 600; }
-
-/* Main Content Area */
-.main-content { margin-left: var(--sidebar-width); flex: 1; padding: 3rem; }
-
-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
-
-header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
-
-.user-badge { 
-    background: white; padding: 0.6rem 1.2rem; border-radius: 14px; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 10px;
-    font-weight: 600; border: 1px solid #e2e8f0;
+.sidebar nav a:hover, 
+.sidebar nav a.active { 
+    background: rgba(56, 189, 248, 0.1); 
+    color: #38bdf8; 
 }
 
-/* Glassy Stat Cards */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; margin-bottom: 3.5rem; }
-
-.stat-card {
-    background: white; padding: 2rem; border-radius: 24px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.02);
-    border: 1px solid rgba(255,255,255,0.8);
-    position: relative; overflow: hidden;
+.sidebar nav a.active { 
+    background: #38bdf8; 
+    color: #0f172a; 
+    font-weight: 600; 
 }
 
-.stat-card::after {
-    content: ""; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary);
+.sidebar nav a[style*="margin-top: auto"],
+.sidebar nav a.nav-logout {
+    margin-top: auto !important;
 }
 
-.stat-number { font-size: 2.5rem; font-weight: 800; color: var(--dark); line-height: 1; }
-
-.stat-card p { color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-top: 0.8rem; }
-
-/* Action Cards - The "SaaS" Look */
-.section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--dark); }
-
-.action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem; }
-
-.action-card {
-    background: white; padding: 2.5rem; border-radius: 24px;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid #e2e8f0; position: relative;
-}
-
-.action-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--primary); }
-
-.action-card h3 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--dark); }
-
-.action-card p { color: var(--text-muted); line-height: 1.6; margin-bottom: 1.5rem; }
-
-.btn-action {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--primary); color: white; padding: 0.8rem 1.5rem;
-    border-radius: 12px; text-decoration: none; font-weight: 600;
-    transition: 0.3s;
-}
-
-.btn-action:hover { background: var(--dark); box-shadow: 0 8px 15px rgba(37, 99, 235, 0.2); }
-/* --- ADD THIS TO THE BOTTOM OF YOUR CSS --- */
-
-/* Sidebar collapsed state */
-.sidebar.collapsed {
-    width: 80px;
-    padding: 2.5rem 0.5rem;
-}
-
-/* Hide text and logo name when collapsed */
-.sidebar.collapsed .logo span, 
-.sidebar.collapsed nav a span {
-    display: none;
-}
-
-/* Center icons and remove gap when collapsed */
-.sidebar.collapsed nav a {
-    justify-content: center;
-    padding: 1rem;
-    gap: 0;
-}
-
-/* Adjust Main Content when sidebar is collapsed */
-.main-content.expanded {
-    margin-left: 80px;
-}
-
-/* Smooth transitions for all changing elements */
-.sidebar, .main-content, .logo span, nav a span {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Floating Toggle Button */
+/* --- FLOATING TOGGLE ANIMATION SYSTEM --- */
 .toggle-btn {
     position: absolute;
     right: -12px;
@@ -147,78 +127,576 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
     border: none;
     font-size: 0.8rem;
     z-index: 1001;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-  .analytics-container {
-            margin-top: 1.5rem;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #ffffff;
-            box-shadow: 0 10px 15px -3px rgba(245, 223, 223, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            position: relative;
-        }
 
-        /* Responsive iframe container wrapper */
-        .iframe-responsive-wrapper {
-            position: relative;
-            width: 100%;
-            height: 700px; /* Enhanced height for clear visibility of complex spatial charts */
-            background: #f7fafc;
-        }
+/* Sidebar Collapsed State Updates */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed);
+    padding: 2.5rem 0.5rem;
+}
 
-        .iframe-responsive-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+.sidebar.collapsed .logo span, 
+.sidebar.collapsed nav a span {
+    display: none;
+}
 
-        /* Optional: Smooth fade-in animation for loading views */
-        .fade-in {
-            animation: fadeIn 0.4s ease-in-out;
-        }
+.sidebar.collapsed nav a {
+    justify-content: center;
+    padding: 1rem;
+    gap: 0;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* 1. Make the card layout split horizontally using Flexbox */
+/* --- MAIN CONTENT LAYOUT AREA --- */
+.main-content { 
+    margin-left: var(--sidebar-width); 
+    flex: 1; 
+    padding: 3rem; 
+    transition: margin-left var(--sidebar-width) var(--transition-curve);
+    min-width: 0;
+}
+
+.main-content.expanded {
+    margin-left: var(--sidebar-collapsed);
+}
+
+/* --- UTILITY STRUCTURES & TEXT CLASSES --- */
+header, .dashboard-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 3rem; 
+    gap: 1.5rem;
+}
+
+header h1, .dashboard-header h1 { 
+    font-size: 2.2rem; 
+    font-weight: 800; 
+    letter-spacing: -1px; 
+    color: var(--dark);
+}
+
+.header-subtitle {
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.user-badge { 
+    background: white; 
+    padding: 0.6rem 1.2rem; 
+    border-radius: 14px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    font-weight: 600; 
+    border: 1px solid #e2e8f0;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.section-title { 
+    font-size: 1.4rem; 
+    font-weight: 700; 
+    margin-bottom: 1.5rem; 
+    color: var(--dark); 
+    margin-top: 2rem;
+}
+
+/* Global Contextual Semantic Colors */
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-success { color: var(--success); }
+.text-primary { color: var(--primary-geo); }
+.text-info { color: var(--info); }
+.text-purple { color: var(--purple); }
+
+.bg-danger { background: var(--danger); }
+.bg-warning { background: var(--warning); }
+.bg-success { background: var(--success); }
+
+.progress-icon-danger { color: var(--danger); margin-right: 0.5rem; }
+.progress-icon-warning { color: var(--warning); margin-right: 0.5rem; }
+.progress-icon-success { color: var(--success); margin-right: 0.5rem; }
+
+/* --- CORE COMPONENT GRIDS --- */
+.stats-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+    gap: 2rem; 
+    margin-bottom: 3.5rem; 
+}
+
+.action-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+    gap: 2rem; 
+}
+
+/* --- STATS & SaaS CARDS UI --- */
+.stat-card {
+    background: white; 
+    padding: 2rem; 
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.02);
+    border: 1px solid rgba(255,255,255,0.8);
+    position: relative; 
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: ""; 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 6px; 
+    height: 100%; 
+    background: var(--primary);
+}
+
+.stat-number { 
+    font-size: 2.5rem; 
+    font-weight: 800; 
+    color: var(--dark); 
+    line-height: 1; 
+}
+
+.stat-card p { 
+    color: var(--text-muted); 
+    font-size: 1rem; 
+    font-weight: 500; 
+    margin-top: 0.8rem; 
+}
+
+.action-card {
+    background: white; 
+    padding: 2.5rem; 
+    border-radius: 24px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #e2e8f0; 
+    position: relative;
+}
+
+.action-card:hover { 
+    transform: translateY(-10px); 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+    border-color: var(--primary); 
+}
+
+.action-card h3 { 
+    font-size: 1.3rem; 
+    margin-bottom: 1rem; 
+    color: var(--dark); 
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-card p { 
+    color: var(--text-muted); 
+    line-height: 1.6; 
+    margin-bottom: 1.5rem; 
+}
+
+.btn-action {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px;
+    background: var(--primary); 
+    color: white; 
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px; 
+    text-decoration: none; 
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-action:hover { 
+    background: var(--dark); 
+    box-shadow: 0 8px 15px rgba(37, 99, 235, 0.2); 
+}
+
+/* --- GLASSMORPHISM POWER BI ANALYTICS INTERFACES --- */
+.analytics-card {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25);
+    margin: 20px auto;
+    max-width: 1200px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.analytics-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.header-title {
+    font-size: 1.3rem;
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Real-Time Live Pulse System Indicator */
+.pulse-icon {
+    width: 10px;
+    height: 10px;
+    background-color: #00ffcc;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ffcc;
+    animation: livePulse 2s infinite;
+}
+
+@keyframes livePulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 255, 204, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0); }
+}
+
+.system-badge {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Exact 16:9 Dashboard Container Configuration */
+.iframe-responsive-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* Golden 16:9 layout constraints */
+    border-radius: 12px;
+    overflow: hidden; 
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    background: #f7fafc;
+}
+
+.iframe-responsive-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* --- STAKEHOLDER METRICS GRID SYSTEM --- */
+.stakeholder-metrics-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Left Panel: Circular Progress Indicators */
+.chart-card-donut {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid #edf2f7;
+}
+
+.card-meta-label {
+    font-size: 0.85rem; 
+    font-weight: 700; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.progress-ring-box {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 1rem 0;
+}
+
+.circular-chart-render {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circular-chart-render circle {
+    fill: none;
+    stroke-width: 3.8;
+    stroke-linecap: round;
+}
+
+.circle-bg-track { stroke: #edf2f7; }
+.circle-progress-fill {
+    stroke: var(--danger);
+    transition: stroke-dasharray 0.6s ease;
+}
+
+.chart-inner-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--dark);
+}
+
+/* Right Panel: Linear Progress Card Layouts */
+.linear-metrics-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #edf2f7;
+}
+
+.metric-progress-group { margin-bottom: 1.25rem; }
+.metric-progress-group:last-child { margin-bottom: 0; }
+
+.metric-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.progress-track-wrapper {
+    background: #edf2f7;
+    height: 10px;
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill-indicator {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 1s ease-in-out;
+}
+
+/* --- NESTED ACTION HIGH RISK WATCHLISTS --- */
+.nested-location-watchlist {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #edf2f7;
+    text-align: left;
+    width: 100%;
+}
+
+.watchlist-section-title {
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    color: var(--danger); 
+    text-transform: uppercase; 
+    display: block; 
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
+}
+
+.nested-location-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.82rem;
+    transition: transform 0.2s ease;
+}
+
+.nested-location-item:hover { transform: translateX(3px); }
+
+.item-text-wrapper { min-width: 0; flex: 1; }
+
+.nested-location-name {
+    font-weight: 700;
+    color: var(--danger-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.nested-location-tag {
+    font-size: 0.72rem;
+    color: var(--danger);
+    display: block;
+    font-weight: 500;
+}
+
+.vulnerability-percentage-pill {
+    font-weight: 800; 
+    color: var(--danger); 
+    font-size: 0.8rem;
+    background: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--danger-border);
+    margin-left: 0.5rem;
+}
+
+.watchlist-empty-state {
+    font-size: 0.75rem; 
+    color: #a0aec0; 
+    text-align: center;
+    padding: 1rem;
+}
+
+/* --- GEOGRAPHIC REGIONAL MATRIX TABLES --- */
+.regional-risk-card, .regional-risk-card-wrapper {
+    margin-top: 1.5rem;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: none;
+}
+
+.regional-card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.geo-chart-table, .geo-chart-table-compact {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    border: 1px solid #edf2f7;
+}
+
+.geo-chart-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #718096;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #edf2f7;
+}
+
+.geo-chart-table td, .geo-chart-table-compact tr {
+    border-bottom: 1px solid #edf2f7;
+}
+
+.geo-chart-table-compact tr:last-child { border-bottom: none; }
+
+.geo-chart-table td, .geo-chart-table-compact td {
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+    color: #2d3748;
+    vertical-align: middle;
+}
+
+.geo-td-label {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #2d3748;
+}
+
+/* Integrated Micro Progress Indicators */
+.micro-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.micro-bar-rail {
+    background: #edf2f7;
+    height: 8px;
+    border-radius: 4px;
+    flex-grow: 1;
+    overflow: hidden;
+    max-width: 100px;
+}
+
+.micro-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f4a261, #e63946);
+    border-radius: 4px;
+}
+
+.risk-badge-pill {
+    background: var(--danger-bg);
+    color: var(--danger);
+    padding: 1px 6px;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
 .report-card {
     display: flex;
     flex-direction: row;
-    background: #1a2332; /* Deep background matching your dashboard */
+    background: #1a2332; 
     border-radius: 16px;
     overflow: hidden;
     margin-bottom: 24px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    height: 240px; /* Locked height ensures neat grids */
+    height: 240px; 
 }
 
-/* 2. Control the visual container */
 .report-image-wrapper {
-    width: 40%; /* Allocates proportional area for the beach photo */
+    width: 40%; 
     height: 100%;
 }
 
 .report-image-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Prevents compression or squishing */
+    object-fit: cover; 
 }
 
-/* 3. Give content text its needed spacing (Crucial Fix) */
 .report-body {
     width: 60%;
-    padding: 20px 24px; /* Creates clean margins around text */
+    padding: 20px 24px; 
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Evenly spreads header, body, footer */
+    justify-content: space-between; 
 }
 
-/* 4. Align text title and badges beautifully */
 .report-top {
     display: flex;
     justify-content: space-between;
@@ -238,7 +716,6 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
     font-size: 0.85rem;
 }
 
-/* Status badge panel alignment */
 .report-top > div {
     display: flex;
     flex-direction: column;
@@ -246,7 +723,6 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
     gap: 6px;
 }
 
-/* 5. Separate action tools neatly at the base */
 .report-footer {
     display: flex;
     justify-content: space-between;
@@ -264,12 +740,9 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
     font-size: 0.88rem;
 }
 
-.meta-info p {
-    margin: 0;
-}
-/* ==========================================================================
-   ZUS COFFEE INSPIRED MINIMALIST APP NOTIFICATIONS
-   ========================================================================== */
+.meta-info p { margin: 0; }
+
+/* --- MINIMALIST MODAL APP ALERTS (ZUS COFFEE INSPIRED) --- */
 .warn-notification-overlay {
     position: fixed;
     top: 0;
@@ -333,13 +806,13 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
 
 .warn-close-btn:hover {
     background: rgba(229, 62, 62, 0.1);
-    color: #e53e3e;
+    color: var(--danger);
 }
 
 .warn-card-accent-bar {
     width: 100%;
     height: 6px;
-    background: linear-gradient(90deg, #e53e3e, #feb2b2);
+    background: linear-gradient(90deg, var(--danger), #feb2b2);
 }
 
 .warn-card-content {
@@ -357,16 +830,14 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
 .warn-pulse-dot {
     width: 8px;
     height: 8px;
-    background-color: #e53e3e;
+    background-color: var(--danger);
     border-radius: 50%;
     display: inline-block;
     box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7);
     animation: warnPulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
 }
 
-@keyframes warnPulse {
-    to { box-shadow: 0 0 0 8px rgba(229, 62, 62, 0); }
-}
+@keyframes warnPulse { to { box-shadow: 0 0 0 8px rgba(229, 62, 62, 0); } }
 
 .warn-warning-header h2 {
     color: #1a202c;
@@ -379,7 +850,7 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
 .warn-location-badge {
     background: rgba(229, 62, 62, 0.06);
     border: 1px solid rgba(229, 62, 62, 0.12);
-    color: #e53e3e;
+    color: var(--danger);
     padding: 6px 12px;
     border-radius: 12px;
     display: inline-block;
@@ -395,9 +866,7 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
     margin: 0 0 24px 0;
 }
 
-.warn-action-footer {
-    width: 100%;
-}
+.warn-action-footer { width: 100%; }
 
 .warn-btn-primary {
     background: #1a202c;
@@ -416,34 +885,59 @@ header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
     transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.warn-btn-primary:hover {
-    background: #2d3748;
+.warn-btn-primary:hover { background: #2d3748; }
+.warn-btn-primary:active { transform: scale(0.98); }
+
+/* --- SMOOTH SYSTEM ANIMATION TELEMETRY --- */
+.fade-in { animation: fadeIn 0.4s ease-in-out; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.warn-btn-primary:active {
-    transform: scale(0.98);
+/* --- RESPONSIVE STRUCTURAL MEDIA QUERY QUOTAS --- */
+@media (max-width: 992px) {
+    .stakeholder-metrics-row { grid-template-columns: 1fr; }
 }
-.header-actions-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .home-nav-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.05);
-            color: #2d3748;
-            padding: 10px 18px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        .home-nav-btn:hover {
-            background: #1a202c;
-            color: #ffffff !important;
-            transform: translateY(-1px);
-        }
+
+@media (max-width: 768px) {
+    header, .dashboard-header { flex-direction: column; align-items: flex-start; }
+    .user-badge { width: 100%; justify-content: center; }
+    .report-card { flex-direction: column; height: auto; }
+    .report-image-wrapper { width: 100%; height: 200px; }
+    .report-body { width: 100%; }
+}
+/* Minimal Ribbon Component Styles */
+.ribbon-metric {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.ribbon-metric:hover {
+    background: #f8fafc;
+}
+
+/* Give selected text metrics clear visibility */
+.ribbon-metric.active {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.ribbon-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.ribbon-label {
+    font-size: 0.9rem;
+    color: #475569;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}

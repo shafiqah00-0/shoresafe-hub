@@ -1,133 +1,236 @@
-/* --- 1. General Page Setup --- */
+/* ==========================================================================
+   1. General Page Setup
+   ========================================================================== */
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: #f8fafc;
     margin: 0;
     padding: 20px;
+    color: #1a202c;
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+.dashboard-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.dashboard-header {
+    margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+    font-size: 1.75rem;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.dashboard-header p {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95rem;
 }
 
 .reports-container {
-    max-width: 1000px;
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
 }
 
-/* --- 2. Individual Report Cards (Visible on load) --- */
+.empty-state {
+    text-align: center;
+    padding: 48px;
+    background: white;
+    border-radius: 16px;
+    color: #64748b;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   2. Individual Report Cards Layout
+   ========================================================================== */
 .report-card {
     display: flex;
+    flex-direction: column; 
     background: white;
     border-radius: 16px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     overflow: hidden;
-    min-height: 200px;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .report-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-/* Image container */
-.report-image-wrapper {
-    flex: 0 0 280px; /* Fixed width for consistency */
-    background: #edf2f7;
-}
-
-.report-image-wrapper img {
+/* Text Content Body Inner Wrapper */
+.report-body {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Text Content Area */
-.report-content {
-    flex: 1;
-    padding: 24px;
+    padding: 24px !important; /* Forces correct uniform alignment padding */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 16px;
 }
 
-.report-header {
+/* Structural Header Alignment Inside Cards */
+.report-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
 }
 
-.report-header h3 {
-    margin: 0 0 5px 0;
-    color: #1a202c;
-    font-size: 1.25rem;
+.location-box h3 {
+    margin: 0 0 6px 0;
+    font-size: 1.35rem;
+    color: #1e293b;
 }
 
-/* --- 3. Status Badges --- */
+.location-box .lat-long {
+    font-size: 0.875rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ==========================================================================
+   3. Status Badges
+   ========================================================================== */
 .status-badge {
     padding: 6px 14px;
     border-radius: 99px;
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .status-badge.pending { background: #fef3c7; color: #92400e; }
-.status-badge.verified { background: #dcfce7; color: #166534; }
-.status-badge.resolved { background: #d1fae5; color: #065f46; }
+.status-badge.verified { background: #e0f2fe; color: #0369a1; }
+.status-badge.in-progress { background: #dbeafe; color: #1d4ed8; }
+.status-badge.action-taken { background: #fae8ff; color: #a21caf; }
+.status-badge.resolved { background: #dcfce7; color: #15803d; }
 
-.description {
-    color: #4a5568;
-    line-height: 1.6;
-    margin: 15px 0;
-}
-
-/* --- 4. Buttons --- */
-.report-actions {
+/* ==========================================================================
+   4. Action Buttons & Card Footer Elements
+   ========================================================================== */
+.report-footer {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
     display: flex;
-    gap: 12px;
-    margin-top: auto;
+    justify-content: flex-end;
 }
 
-.btn {
+.btn-update {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
     padding: 10px 20px;
     border-radius: 8px;
-    font-weight: 600;
     cursor: pointer;
-    border: none;
-    transition: 0.2s;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
+.btn-update:hover {
+    background: #1d4ed8;
+    color: white;
+    border-color: #1d4ed8;
+}
 
-/* --- 5. THE MODAL (HIDDEN BY DEFAULT) --- */
+/* ==========================================================================
+   5. Upper Fixed Top Navigation Framework
+   ========================================================================== */
+.navbar-top {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10%;
+    border-bottom: 1px solid #e2e8f0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+}
+
+.btn-guest-header {
+    text-decoration: none;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 8px 18px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-guest-header:hover {
+    background-color: #f1f5f9;
+    color: #1e40af;
+    border-color: #e2e8f0;
+}
+
+/* ==========================================================================
+   6. Dynamic Form Modals (Glassmorphism Elements Included)
+   ========================================================================== */
 .modal-overlay {
-    display: none; /* CRITICAL: Keeps form hidden until click */
+    display: none;
     position: fixed;
-    z-index: 9999; /* Sits on top of everything */
+    z-index: 9999;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Dims the background */
-    backdrop-filter: blur(8px); /* Modern blur effect */
+    background-color: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     align-items: center;
     justify-content: center;
+    padding: 16px;
 }
 
-/* The Popup Box */
 .modal-content.glassmorphism {
     background: rgba(255, 255, 255, 0.95);
     padding: 32px;
     border-radius: 20px;
-    width: 450px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    animation: slideIn 0.3s ease-out;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideIn {
-    from { transform: translateY(20px); opacity: 0; }
+    from { transform: translateY(15px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
 
@@ -138,28 +241,60 @@ body {
     margin-bottom: 24px;
 }
 
-.modal-header h2 { margin: 0; font-size: 1.5rem; color: #1a202c; }
+.modal-header h2 { 
+    margin: 0; 
+    font-size: 1.35rem; 
+    color: #0f172a;
+    font-weight: 700;
+}
 
-/* Form Styles */
+.close-btn {
+    font-size: 24px;
+    color: #94a3b8;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+    line-height: 1;
+}
+
+.close-btn:hover { 
+    color: #475569; 
+}
+
+/* Input Forms Styles */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .form-group label {
     display: block;
     font-weight: 600;
+    font-size: 0.875rem;
     margin-bottom: 8px;
-    color: #4a5568;
+    color: #334155;
 }
 
 .form-group select, 
+.form-group input[type="number"],
 .form-group textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.925rem;
+    background-color: #fff;
+    color: #0f172a;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-group select:focus, 
+.form-group input[type="number"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .modal-footer {
@@ -169,123 +304,141 @@ body {
     margin-top: 24px;
 }
 
-.close-btn {
-    font-size: 28px;
-    color: #a0aec0;
-    cursor: pointer;
-    background: none;
+.modal-footer button[type="submit"] {
+    background: #2563eb;
+    color: white;
     border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.close-btn:hover { color: #4a5568; }
+.modal-footer button[type="submit"]:hover {
+    background: #1d4ed8;
+}
 
+/* ==========================================================================
+   7. Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 768px) {
+    .report-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .navbar-top {
+        padding: 0 4%;
+    }
+}
+/* ==========================================================================
+   Interactive Timeline Buttons (Modern Standard Style)
+   ========================================================================== */
+.timeline-item-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes date/meta and right info apart */
+    gap: 16px;
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.timeline-item-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-item-btn:active {
+    transform: translateY(0);
+}
+
+/* Left Content Block: Flex Wrapper */
+.timeline-btn-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Rounded Decorative Icon Box */
+.history-icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background: #eff6ff; /* Soft blue tint */
+    color: #2563eb;     /* Strong primary anchor */
+    border-radius: 50%;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Metadata Text Hierarchies */
+.history-meta-text {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #475569;
+}
+
+.history-meta-text strong {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.925rem;
+}
+
+.history-meta-text span {
+    color: #64748b;
+    font-weight: 500;
+}
 .btn-delete {
-    background: #fff5f5; /* Light red background */
-    color: #c53030;    /* Dark red text */
-    border: 1px solid #feb2b2;
+    background: #fff5f5;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
     padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
+    font-family: inherit;
+    font-size: 0.875rem;
     font-weight: 600;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-delete:hover {
-    background: #c53030; /* Dark red on hover */
+    background: #b91c1c;
     color: white;
-    border-color: #c53030;
+    border-color: #b91c1c;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.15);
 }
 
-.btn-update {
-    background: #c2ecff; /* Light red background */
-    color: #254ecb;    /* Dark red text */
-    border: 1px solid #72afd2;
-    padding: 10px 20px;
+.report-thumb {
+    width: 60px;           /* Sets a fixed width */
+    height: 60px;          /* Sets a fixed height to match width */
+    object-fit: cover;     /* Crops the image to fill the 60x60 space */
+    object-position: center; /* Ensures the middle of the image is shown */
+    border-radius: 8px;    /* Optional: rounds the corners */
+    display: block;        /* Ensures no extra spacing at the bottom */
+}
+.history-popup-img {
+    display: block;
+    width: 100%;             /* Fills the modal width */
+    max-height: 300px;       /* Limits height to prevent modal overflow */
+    object-fit: contain;     /* Ensures the whole image is visible without cropping */
     border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.btn-update:hover {
-    background: #303ac5; /* Dark red on hover */
-    color: white;
-    border-color: #3055c5;
-}
-
-.navbar-top {
-    position: sticky;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 72px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    
-    /* Alignment Logic */
-    display: flex;
-    align-items: center;         /* Vertical alignment */
-    justify-content: space-between; /* Horizontal spacing */
-    
-    padding: 0 10%;              /* Matches your dashboard width */
-    border-bottom: 1px solid #e2e8f0;
-    z-index: 1000;
-    box-sizing: border-box;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #0077b6;
-    display: flex;
-    align-items: center;
-}
-
-.btn-guest-header {
-    text-decoration: none;
-    color: #4a5568;
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.btn-guest-header:hover {
-    background-color: #f1f5f9;
-    color: #0077b6;
-    border-color: #e2e8f0;
-}
-/* --- 6. Risk Level Badges (Lighter Styles) --- */
-.risk-badge {
-    padding: 6px 14px;
-    border-radius: 99px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-    display: inline-block;
-    border: 1px solid transparent;
-}
-
-/* Light Yellow style for Medium Risk */
-.risk-badge.medium {
-    background-color: #fff7ed; /* Soft light orange/yellow background */
-    color: #c2410c;            /* Readable dark orange text */
-    border-color: #ffedd5;
-}
-
-/* Light Red style for High Risk (Optional addition) */
-.risk-badge.high {
-    background-color: #fef2f2; /* Soft light red background */
-    color: #b91c1c;            /* Readable dark red text */
-    border-color: #fee2e2;
-}
-
-/* Light Green style for Low Risk (Optional addition) */
-.risk-badge.low {
-    background-color: #f0fdf4; /* Soft light green background */
-    color: #15803d;            /* Readable dark green text */
-    border-color: #dcfce7;
+    background-color: #f1f5f9; /* Light background for transparent images */
+    margin: 0 auto 15px auto;
 }

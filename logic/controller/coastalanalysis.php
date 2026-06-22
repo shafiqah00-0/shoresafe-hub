@@ -1,16 +1,37 @@
 <?php
 session_start();
 
-// Enforce role-based access control if needed, matching your system's session variables
-$role = $_SESSION['role_type'] ?? 'authorities';
-
-// Optional: If you want to restrict this page to only Authorities and Admins, uncomment the lines below:
-/*
-if (!in_array($role, ['authorities', 'admin'])) {
-    header("Location: /login.php");
+// 1. Check if the user is logged in and has a valid role
+if (!isset($_SESSION['role_type'])) {
+    // No role found in session -> Redirect to login page
+    header("Location: /interface/login.php"); 
     exit();
 }
-*/
+
+$role = $_SESSION['role_type'];
+
+// 2. Define allowed roles for this specific page
+$allowedRoles = ['authorities', 'stakeholders']; 
+
+// 3. Strict Role Verification Check
+if (!in_array($role, $allowedRoles)) {
+    // Role is not authorized -> Redirect to login
+    header("Location: /interface/login.html"); 
+    exit();
+}
+
+// 4. Define the dedicated PUBLIC Power BI URLs for each distinct role view
+// FIXED: The authority link now contains the complete, unbroken base64 token string
+$authorityUrl   = "https://app.powerbi.com/view?r=eyJrIjoiY2FhY2Y5ZTAtZGI5Yy00NThhLWI2NDAtNzU4MGUyNjUyN2EwIiwidCI6IjY3N2VlYjU2LWYyZGYtNDY3NS05ZTBjLWNjZDYwMGE5MTU4MCIsImMiOjEwfQ%3D%3D";
+$stakeholderUrl = "https://app.powerbi.com/view?r=eyJrIjoiYzY4YTVmNDktYjFmNy00M2E0LTk4OWEtMDYwYjQyNTU3ZGVmIiwidCI6IjY3N2VlYjU2LWYyZGYtNDY3NS05ZTBjLWNjZDYwMGE5MTU4MCIsImMiOjEwfQ%3D%3D";
+
+if ($role === 'authorities') {
+    $embedUrl = $authorityUrl;
+    $overviewUrl = "/interface/dashboard/authorities.php";
+} else {
+    $embedUrl = $stakeholderUrl;
+    $overviewUrl = "/interface/dashboard/stakeholders.php";
+}
 ?>
 
 <!DOCTYPE html>
@@ -24,41 +45,30 @@ if (!in_array($role, ['authorities', 'admin'])) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <link rel="stylesheet" href="/interface/css/dashboard.css">
 </head>
 <body>
+<aside class="sidebar" id="sidebar">
+    <button class="toggle-btn" id="toggle-btn">
+        <i class="fas fa-chevron-left" id="toggle-icon"></i>
+    </button>
+    <div class="logo">
+         <span> 🌊 ShoreSafe</span>
+    </div>
+    <nav>
+        <a href="<?= htmlspecialchars($overviewUrl) ?>" class="active">
+            <i class="fas fa-home"></i> <span>Overview</span>
+        </a>
+        <a href="/logic/controller/coastalanalysis.php">
+            <i class="fas fa-file-alt"></i> <span>Coastal Analysis</span>
+        </a>
+        <a href="/logic/controller/logout.php" style="margin-top: auto;">
+            <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+        </a>
+    </nav>
+</aside>
 
 <div class="dashboard-wrapper" style="display: flex; min-height: 100vh;">
-
-    <aside class="sidebar" id="sidebar">
-        <button class="toggle-btn" id="toggle-btn" aria-label="Toggle Navigation Sidebar">
-            <i class="fas fa-chevron-left" id="toggle-icon"></i>
-        </button>
-
-        <div class="logo">
-            <i class="fas fa-water"></i> <span>ShoreSafe</span>
-        </div>
-
-        <nav>
-            <a href="index.php?page=dashboard">
-                <i class="fas fa-home"></i> <span>Overview</span>
-            </a>
-
-            <a href="/logic/controller/managereport.php">
-                <i class="fas fa-chart-pie"></i> <span>Report Management</span>
-            </a>
-
-            <a href="coastal_analysis.php" class="active">
-                <i class="fas fa-file-alt"></i> <span>Coastal Analysis</span>
-            </a>
-
-            <a href="/logic/controller/logout.php" style="margin-top: auto;">
-                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
-            </a>
-        </nav>
-    </aside>
-
     <main class="main-content fade-in" id="main-content">
         
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -75,31 +85,34 @@ if (!in_array($role, ['authorities', 'admin'])) {
             </div>
         </header>
 
-        <div class="analytics-container">
+        <div class="analytics-card">
+            <div class="card-header">
+                <div class="header-title">
+                    <span class="pulse-icon"></span> Real-Time GIS Analytics
+                </div>
+                <span class="system-badge">Power BI Public Stream</span>
+            </div>
             <div class="iframe-responsive-wrapper">
-                <iframe title="locreportpsm" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiY2FhY2Y5ZTAtZGI5Yy00NThhLWI2NDAtNzU4MGUyNjUyN2EwIiwidCI6IjY3N2VlYjU2LWYyZGYtNDY3NS05ZTBjLWNjZDYwMGE5MTU4MCIsImMiOjEwfQ%3D%3D" frameborder="0" allowFullScreen="true"></iframe>
+                <iframe 
+                    src="<?= htmlspecialchars($embedUrl) ?>"
+                    frameborder="0" 
+                    allowFullScreen="true">
+                </iframe>
             </div>
         </div>
-
     </main>
 </div>
 
 <script>
-// Capture layout control DOM anchors
 const sidebar = document.getElementById('sidebar');
 const mainContent = document.getElementById('main-content');
 const toggleBtn = document.getElementById('toggle-btn');
 const toggleIcon = document.getElementById('toggle-icon');
 
-/**
- * Event listener managing structural CSS updates. Responsible for layout animations 
- * when breaking fluid grids back and forth for screen space optimization rules.
- */
 toggleBtn.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
     mainContent.classList.toggle('expanded');
 
-    // Smoothly swap graphic vectors based on structural widths
     if (sidebar.classList.contains('collapsed')) {
         toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
     } else {
@@ -107,6 +120,5 @@ toggleBtn.addEventListener('click', () => {
     }
 });
 </script>
-
 </body>
 </html>
