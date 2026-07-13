@@ -59,12 +59,8 @@ if ($role === 'authorities') {
         <a href="<?= htmlspecialchars($overviewUrl) ?>" class="active">
             <i class="fas fa-home"></i> <span>Overview</span>
         </a>
-        <a href="/logic/controller/coastalanalysis.php">
-            <i class="fas fa-file-alt"></i> <span>Coastal Analysis</span>
-        </a>
-        <a href="/logic/controller/logout.php" style="margin-top: auto;">
-            <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
-        </a>
+
+
     </nav>
 </aside>
 
