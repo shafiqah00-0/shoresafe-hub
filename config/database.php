@@ -4,7 +4,7 @@
 // Check Railway's standard PostgreSQL env variables, then custom env variables, then local defaults
 $host     = getenv('PGHOST')     ?: getenv('DB_HOST')     ?: 'localhost';
 $port     = getenv('PGPORT')     ?: getenv('DB_PORT')     ?: '5432';
-$dbname   = getenv('PGDATABASE') ?: getenv('DB_NAME')     ?: 'shoresafe';
+$dbname   = getenv('PGDATABASE') ?: getenv('DB_NAME')     ?: 'psm';
 $user     = getenv('PGUSER')     ?: getenv('DB_USER')     ?: 'postgres';
 $password = getenv('PGPASSWORD') ?: getenv('DB_PASS')     ?: '1234';
 
