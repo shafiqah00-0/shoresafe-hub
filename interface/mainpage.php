@@ -3,25 +3,15 @@
 // Adjust this path to point correctly to your database configuration file
 //require_once __DIR__ . '/../config/database.php';
 //require_once $_SERVER['DOCUMENT_ROOT'] . '/config/database.php';
-die("RAILWAY IS RUNNING NEW CODE NOW!");
-$possible_paths = [
-    __DIR__ . '/../config/database.php',         // Default relative
-    $_SERVER['DOCUMENT_ROOT'] . '/config/database.php', // Public root
-    dirname(__DIR__) . '/config/database.php',   // Parent directory
-    '/app/config/database.php',                  // Hardcoded for Railway/FrankenPHP
-    '/var/www/html/config/database.php'          // Hardcoded for Docker/Apache
-];
+$db_path = dirname(__DIR__) . '/config/database.php';
 
-$db_path = null;
-foreach ($possible_paths as $path) {
-    if (file_exists($path)) {
-        $db_path = $path;
-        break;
-    }
+if (!file_exists($db_path)) {
+    // Fallback check if working directory varies
+    $db_path = $_SERVER['DOCUMENT_ROOT'] . '/config/database.php';
 }
 
-if (!$db_path) {
-    die("CRITICAL ERROR: Could not find database.php in any of the expected locations. Current working directory is: " . getcwd());
+if (!file_exists($db_path)) {
+    die("CRITICAL ERROR: Cannot locate config/database.php on server.");
 }
 
 require_once $db_path;
