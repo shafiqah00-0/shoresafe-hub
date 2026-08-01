@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y libpq-dev \
 RUN a2enmod rewrite
 
 # 3. Copy all project files to Apache default web folder
-COPY . /var/www/html/
+COPY . www/html/
 
 # 4. Set permissions so Apache can read all files
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data www/html
 
 # 5. Set working directory
-WORKDIR /var/www/html
+WORKDIR www/html
 
 # Expose standard web port
 EXPOSE 80
