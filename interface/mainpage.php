@@ -1,7 +1,8 @@
 <?php
 // session_start();
 // Adjust this path to point correctly to your database configuration file
-require_once __DIR__ . '/../config/database.php';
+//require_once __DIR__ . '/../config/database.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config/database.php';
 
 try {
     // 1. Count High Risk Locations
