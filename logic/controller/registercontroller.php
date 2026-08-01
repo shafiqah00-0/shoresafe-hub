@@ -12,73 +12,127 @@ $response = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $full_name = trim($_POST['full_name'] ?? '');
-    $username  = trim($_POST['username'] ?? '');
-    $email     = trim($_POST['email'] ?? '');
-    $password  = $_POST['password'] ?? '';
-    $user_type = $_POST['user_type'] ?? 'public';
+    $full_name  = trim($_POST['full_name'] ?? '');
+    $username   = trim($_POST['username'] ?? '');
+    $email      = trim($_POST['email'] ?? '');
+    $password   = $_POST['password'] ?? '';
+    $user_type  = $_POST['user_type'] ?? 'public';
+    $reg_number = trim($_POST['reg_number'] ?? '');
 
+    // Basic Validation
     if (!$full_name || !$username || !$email || !$password) {
-        $response['message'] = "Please fill in all fields";
+        $response['message'] = "Please fill in all required fields.";
         echo json_encode($response);
         exit;
     }
 
-    try {
+    // 1. EXTRACT AND CHECK DOMAIN VALIDATION
+    $email_parts = explode('@', $email);
+    $domain = strtolower(end($email_parts));
 
-        // check username
+    $blocked_public_domains = [
+        'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 
+        'live.com', 'icloud.com', 'ymail.com', 'protonmail.com', 'aol.com'
+    ];
+
+    // Check Authority Domain (.gov requirement)
+    if ($user_type === 'authorities') {
+        if (!str_contains($domain, '.gov')) {
+            $response['message'] = "Authorities must use an official government email address (e.g., officer@agency.gov.my).";
+            echo json_encode($response);
+            exit;
+        }
+    }
+
+    // Check Stakeholder & Authority domain (Block free/public email providers)
+    if ($user_type === 'authorities' || $user_type === 'stakeholders') {
+        if (in_array($domain, $blocked_public_domains)) {
+            $response['message'] = "Free domains like @{$domain} are not allowed for " . ucfirst($user_type) . " accounts. Please use an official work domain.";
+            echo json_encode($response);
+            exit;
+        }
+    }
+
+    try {
+        // 2. CHECK USERNAME UNIQUE
         $stmt = $pdo->prepare("SELECT userid FROM users WHERE username = ?");
         $stmt->execute([$username]);
-
         if ($stmt->fetch()) {
-            $response['message'] = "Username already taken";
+            $response['message'] = "Username is already taken.";
             echo json_encode($response);
             exit;
         }
 
-        // check email
+        // 3. CHECK EMAIL UNIQUE
         $stmt = $pdo->prepare("SELECT userid FROM users WHERE email = ?");
         $stmt->execute([$email]);
-
         if ($stmt->fetch()) {
-            $response['message'] = "Email already registered";
+            $response['message'] = "Email address is already registered.";
             echo json_encode($response);
             exit;
         }
-        // Explicitly determine status based on role_type
-        if ($user_type === 'public') {
-    $status = 'active';
-        } elseif ($user_type === 'authorities' || $user_type === 'stakeholders') {
-    $status = 'pending';
-} else {
-    // Fallback if someone sends a weird user_type
-    $status = 'pending'; 
-}
 
-        // insert user
+        // 4. GENERATE VERIFICATION TOKEN & PREPARE STATUS
+        $verification_token = bin2hex(random_bytes(32));
+
+        // Public users are auto-active and auto-verified (1 / true)
+        // Authorities & Stakeholders start as pending and unverified (0 / false)
+        if ($user_type === 'public') {
+            $status = 'active';
+            $email_verified = 1; 
+        } else {
+            $status = 'pending';
+            $email_verified = 0; 
+        }
+
+        // 5. INSERT USER RECORD
         $hashed = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $pdo->prepare("
-    INSERT INTO users (username, email, password, full_name, role_type, reg_number, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-");
+            INSERT INTO users (username, email, password, full_name, role_type, reg_number, status, verification_token, email_verified)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
 
-$stmt->execute([
-    $username,
-    $email,
-    $hashed,
-    $full_name,
-    $user_type,
-    $_POST['reg_number'] ?? null, // Capture the reg_number from the form
-    $status                       // Save the determined status
-]);
+        $stmt->execute([
+            $username,
+            $email,
+            $hashed,
+            $full_name,
+            $user_type,
+            !empty($reg_number) ? $reg_number : null,
+            $status,
+            $verification_token,
+            $email_verified
+        ]);
 
-        $response['success'] = true;
-        $response['message'] = "Registration successful!";
-        $response['redirect'] = "/index.php?page=login";
+        // 6. SEND VERIFICATION EMAIL FOR AUTHORITIES & STAKEHOLDERS
+        if ($user_type !== 'public') {
+            $verify_link = "http://" . $_SERVER['HTTP_HOST'] . "/verify_email.php?token=" . $verification_token;
+
+            $subject = "Verify Your Email Address - ShoreSafe";
+            $message = "Hello " . htmlspecialchars($full_name) . ",\n\n";
+            $message .= "Thank you for registering as an official " . ucfirst($user_type) . " on ShoreSafe.\n\n";
+            $message .= "Please click the link below to confirm your official email address:\n";
+            $message .= $verify_link . "\n\n";
+            $message .= "Once verified, your account will be sent to the administrator for final review.";
+
+            $headers = "From: no-reply@shoresafe.com\r\n";
+            $headers .= "Reply-To: support@shoresafe.com\r\n";
+
+            // Send email using PHP mail()
+            @mail($email, $subject, $message, $headers);
+
+            $response['success'] = true;
+            $response['message'] = "Registration submitted! Please check your email to verify your inbox before admin review.";
+            $response['redirect'] = "/index.php?page=login";
+        } else {
+            $response['success'] = true;
+            $response['message'] = "Registration successful!";
+            $response['redirect'] = "/index.php?page=login";
+        }
 
     } catch (PDOException $e) {
-        $response['message'] = $e->getMessage();
+        $response['message'] = "Database error: " . $e->getMessage();
     }
 }
 

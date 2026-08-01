@@ -16,10 +16,6 @@
         <div class="left-panel">
             <h2>🌊 ShoreSafe </h2>
             <p>Join us to monitor shoreline for our next generation.</p>
-            <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.9;">
-                <!-- <p><i class="fa-solid fa-shield-halved"></i> Secure Data Access</p>
-                <p><i class="fa-solid fa-map-location-dot"></i> Geospatial Reporting</p> -->
-            </div>
         </div>
 
         <!-- RIGHT PANEL -->
@@ -42,26 +38,29 @@
                     <input type="text" name="username" placeholder="Username" required>
                 </div>
 
-                <!-- Email -->
+                <!-- User Type -->
                 <div class="form-group">
-                    <i class="fa-solid fa-envelope"></i>
-                    <input type="email" name="email" placeholder="Email Address" required>
+                    <i class="fa-solid fa-user-tag"></i>
+                    <select name="user_type" id="userType" required onchange="updateFormFields()">
+                        <option value="" disabled selected>Select Role</option> 
+                        <option value="public">Public User</option>
+                        <option value="authorities">Authority</option>
+                        <option value="stakeholders">Stakeholder</option>
+                    </select>
                 </div>
 
-                <!-- User Type (Mapped to your PHP $user_type) -->
-             <div class="form-group">
-                <i class="fa-solid fa-user-tag"></i>
-                <select name="user_type" id="userType" required onchange="updateFormFields()">
-                    <option value="" disabled selected>Select</option> 
-                    <option value="public">Public User</option>
-                    <option value="authorities">Authority</option>
-                    <option value="stakeholders">Stakeholder</option>
-                </select>
+                <!-- Dynamic Email Input -->
+                <div class="form-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" name="email" id="emailInput" placeholder="Email Address" required>
+                </div>
+                <!-- Dynamic Email Hint -->
+                <small id="emailHint" style="display:none; color: #0077b6; font-size: 0.8rem; margin-top: -10px; margin-bottom: 12px;"></small>
 
-            </div>
-            
-           <div class="form-group" id="regField" style="display:none;">
-            <i class="fa-solid fa-id-badge"></i> <input type="text" id="regInput" name="reg_number" placeholder="Registration Number">
+                <!-- Dynamic Registration Number Input -->
+                <div class="form-group" id="regField" style="display:none;">
+                    <i class="fa-solid fa-id-badge"></i> 
+                    <input type="text" id="regInput" name="reg_number" placeholder="Registration Number">
                 </div>
 
                 <!-- Password -->
@@ -70,7 +69,7 @@
                     <input type="password" id="password" name="password" placeholder="Password" required>
                     <i class="fa-solid fa-eye toggle-password" onclick="togglePass()"></i>
                     
-                    <div class="strength-meter">
+                    <div class="strength-meter" id="strength-meter">
                         <div class="weak"></div>
                         <div class="medium"></div>
                         <div class="strong"></div>
@@ -88,37 +87,32 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-    const passwordInput = document.getElementById('password');
-    const strengthMeter = document.getElementById('strength-meter');
+            const passwordInput = document.getElementById('password');
+            const strengthMeter = document.getElementById('strength-meter');
 
-    passwordInput.addEventListener('input', () => {
-        const val = passwordInput.value;
-        let score = 0;
+            passwordInput.addEventListener('input', () => {
+                const val = passwordInput.value;
+                let score = 0;
 
-        if (val.length === 0) {
-            strengthMeter.className = "strength-meter"; 
-            return;
-        }
+                if (val.length === 0) {
+                    strengthMeter.className = "strength-meter"; 
+                    return;
+                }
 
-        // 1. Length Rule
-        if (val.length >= 8) score++;
-        
-        // 2. Complexity Rule: Contains both letters and numbers
-        if (/[A-Za-z]/.test(val) && /[0-9]/.test(val)) score++;
-        
-        // 3. Advanced Rule: Contains special characters or uppercase mix
-        if (/[^A-Za-z0-9]/.test(val) || (/[a-z]/.test(val) && /[A-Z]/.test(val))) score++;
+                if (val.length >= 8) score++;
+                if (/[A-Za-z]/.test(val) && /[0-9]/.test(val)) score++;
+                if (/[^A-Za-z0-9]/.test(val) || (/[a-z]/.test(val) && /[A-Z]/.test(val))) score++;
 
-        // Update UI classes based on score results
-        if (score === 1) {
-            strengthMeter.className = "strength-meter is-weak";
-        } else if (score === 2) {
-            strengthMeter.className = "strength-meter is-medium";
-        } else if (score >= 3) {
-            strengthMeter.className = "strength-meter is-strong";
-        }
+                if (score === 1) {
+                    strengthMeter.className = "strength-meter is-weak";
+                } else if (score === 2) {
+                    strengthMeter.className = "strength-meter is-medium";
+                } else if (score >= 3) {
+                    strengthMeter.className = "strength-meter is-strong";
+                }
             });
         });
+
         function togglePass() {
             const passInput = document.getElementById('password');
             const icon = document.querySelector('.toggle-password');
@@ -128,6 +122,42 @@
             } else {
                 passInput.type = 'password';
                 icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Updates Placeholders and Guidance based on Selected Role
+        function updateFormFields() {
+            const userType = document.getElementById('userType').value;
+            const regField = document.getElementById('regField');
+            const regInput = document.getElementById('regInput');
+            const emailInput = document.getElementById('emailInput');
+            const emailHint = document.getElementById('emailHint');
+
+            if (userType === 'authorities') {
+                regField.style.display = 'block';
+                regInput.placeholder = "Authority Badge / ID Number";
+                regInput.required = true;
+                
+                // Dynamic Email Placeholder & Hint
+                emailInput.placeholder = "Official Email (e.g., officer@agency.gov.my)";
+                emailHint.style.display = 'block';
+                emailHint.innerText = "Need to use the official government domain (.gov.my)";
+            } else if (userType === 'stakeholders') {
+                regField.style.display = 'block';
+                regInput.placeholder = "Official Registered Number (SSM/ROC)";
+                regInput.required = true;
+
+                // Dynamic Email Placeholder & Hint
+                emailInput.placeholder = "Corporate Email (e.g., alex@company.com)";
+                emailHint.style.display = 'block';
+                emailHint.innerText = "Need to use official company domain.";
+            } else {
+                regField.style.display = 'none';
+                regInput.required = false;
+                
+                // Reset Email Placeholder for Public Users
+                emailInput.placeholder = "Email Address (e.g., name@gmail.com)";
+                emailHint.style.display = 'none';
             }
         }
 
@@ -145,7 +175,6 @@
             const formData = new FormData(form);
 
             try {
-                // Change 'register.php' to the actual path of your PHP file
                 const response = await fetch('/logic/controller/registercontroller.php', { 
                     method: 'POST',
                     body: formData
@@ -176,25 +205,6 @@
                 submitBtn.innerText = "Register Now";
             }
         });
-        function updateFormFields() {
-    const userType = document.getElementById('userType').value;
-    const regField = document.getElementById('regField');
-    const regInput = document.getElementById('regInput');
-
-    if (userType === 'authorities') {
-        regField.style.display = 'block';
-        regInput.placeholder = "Authority ID";
-        regInput.required = true;
-    } else if (userType === 'stakeholders') {
-        regField.style.display = 'block';
-        regInput.placeholder = "Official Registered Number";
-        regInput.required = true;
-    } else {
-        // For 'public' or default
-        regField.style.display = 'none';
-        regInput.required = false;
-    }
-}
     </script>
 </body>
 </html>
