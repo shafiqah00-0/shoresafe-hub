@@ -3,7 +3,7 @@
 // Adjust this path to point correctly to your database configuration file
 //require_once __DIR__ . '/../config/database.php';
 //require_once $_SERVER['DOCUMENT_ROOT'] . '/config/database.php';
-
+die("RAILWAY IS RUNNING NEW CODE NOW!");
 $possible_paths = [
     __DIR__ . '/../config/database.php',         // Default relative
     $_SERVER['DOCUMENT_ROOT'] . '/config/database.php', // Public root
