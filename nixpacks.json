@@ -1,7 +1,7 @@
 {
   "providers": ["php"],
   "nixPkgs": [
-    "php82Extensions.pdo_pgsql",
-    "php82Extensions.pgsql"
+    "php84Extensions.pdo_pgsql",
+    "php84Extensions.pgsql"
   ]
 }
