@@ -1,0 +1,7 @@
+{
+  "providers": ["php"],
+  "nixPkgs": [
+    "php82Extensions.pdo_pgsql",
+    "php82Extensions.pgsql"
+  ]
+}
