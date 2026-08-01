@@ -4,18 +4,14 @@
 //require_once __DIR__ . '/../config/database.php';
 //require_once $_SERVER['DOCUMENT_ROOT'] . '/config/database.php';
 
-$configPath = __DIR__ . '/../config/database.php';
+$db_path = dirname(__DIR__) . '/config/database.php';
 
-if (!file_exists($configPath)) {
-    // Fallback check using document root
-    $configPath = $_SERVER['DOCUMENT_ROOT'] . '/config/database.php';
+if (!file_exists($db_path)) {
+    // Helpful debugging output if file is genuinely missing on Railway
+    die("Error: Cannot find database config at " . $db_path . ". Check if config/database.php is pushed to GitHub.");
 }
 
-if (!file_exists($configPath)) {
-    die("Deployment Error: database.php file not found at " . htmlspecialchars($configPath));
-}
-
-require_once $configPath;
+require_once $db_path;
 
 try {
     // 1. Count High Risk Locations
