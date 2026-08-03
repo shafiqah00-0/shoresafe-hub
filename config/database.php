@@ -8,10 +8,10 @@ function env($key, $default = '') {
 }
 
 $host     = env('PGHOST', env('DB_HOST', 'localhost'));
-$port     = env('PGPORT', env('DB_PORT', '5432'));
-$dbname   = env('PGDATABASE', env('DB_NAME', 'psm'));
+$port     = env('PGPORT', env('DB_PORT', '31884'));
+$dbname   = env('PGDATABASE', env('DB_NAME', 'railway'));
 $user     = env('PGUSER', env('DB_USER', 'postgres'));
-$password = env('PGPASSWORD', env('DB_PASS', '1234'));
+$password = env('PGPASSWORD', env('DB_PASS', 'ZmMHYfMFOdubjVohxRrmUytvPMKgiDQm'));
 
 try {
     // PostgreSQL DSN Connection String
