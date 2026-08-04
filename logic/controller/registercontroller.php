@@ -142,40 +142,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         //     $response['redirect'] = "/index.php?page=login";
         // }
 
-        $mail = new PHPMailer(true);
+        // $mail = new PHPMailer(true);
         // Replace PHPMailer block with Resend HTTP API (Port 443 - Never Blocked)
+// Send Verification Email via Brevo HTTP API (Port 443)
         $email_sent = false;
-        $apiKey = getenv('RESEND_API_KEY');
+        $apiKey = getenv('BREVO_API_KEY');
 
-if (!$apiKey) {
-    error_log("Resend API Key is missing from environment variables.");
-}
-        $payload = [
-            'from'    => 'ShoreSafe <iqashafiqaho9@gmail.com>',
-            'to'      => [$email],
-            'subject' => 'Your Verification Code - ShoreSafe',
-            'html'    => "<p>Hello " . htmlspecialchars($full_name) . ",</p><p>Your 6-digit verification code is: <strong>" . $verification_code . "</strong></p>"
-        ];
-
-        $ch = curl_init('https://api.resend.com/emails');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $apiKey,
-            'Content-Type: application/json'
-        ]);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $result   = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode === 200 || $httpCode === 201) {
-            $email_sent = true;
+        if (!$apiKey) {
+            error_log("Brevo API Key is missing from environment variables.");
         } else {
-            error_log("Resend API Failure [Code $httpCode]: " . $result);
-        }
+            $payload = [
+                'sender'      => [
+                    'name'  => 'ShoreSafe System',
+                    'email' => 'iqashafiqaho9@gmail.com'
+                ],
+                'to'          => [
+                    [
+                        'email' => $email,
+                        'name'  => $full_name
+                    ]
+                ],
+                'subject'     => 'Your Verification Code - ShoreSafe',
+                'htmlContent' => "<p>Hello " . htmlspecialchars($full_name) . ",</p><p>Your 6-digit verification code is: <strong>" . htmlspecialchars($verification_code) . "</strong></p>"
+            ];
 
+            $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'api-key: ' . $apiKey,
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+            $result   = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 201 || $httpCode === 200) {
+                $email_sent = true;
+            } else {
+                error_log("Brevo API Failure [Code $httpCode]: " . $result);
+            }
+        }
 //         try {
 //             $mail->isSMTP();
 //             $mail->Host       = 'smtp.gmail.com';
