@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->SMTPAuth   = true;
             $mail->Username   = getenv('SMTP_USER') ?: 'iqashafiqaho9@gmail.com'; 
             $mail->Password   = getenv('SMTP_PASS') ?: 'azwuytwflpcabfid';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port       = 465;
 
             // Optional: Timeout setting to prevent long hanging connections
@@ -181,14 +181,15 @@ $mail->SMTPOptions = array(
         }
 
         // Always return success & set redirect URL so frontend AJAX can navigate
-        $response['success'] = true;
-        $response['message'] = $email_sent 
-            ? "Registration submitted! Please check your email for your 6-digit verification code." 
-            : "Registration submitted! (Email could not be delivered directly, please check your database for the verification code).";
-        
-        // Relative redirect path pointing directly to verify_email.php in the same folder
-        $response['redirect'] = "verify_email.php?email=" . urlencode($email);
-
+        if ($email_sent) {
+    $response['success']  = true;
+    $response['message']  = "Registration submitted! Please check your email for your 6-digit verification code.";
+    $response['redirect'] = "verify_email.php?email=" . urlencode($email);
+} else {
+    // Fail registration response so AJAX alerts the user and doesn't redirect
+    $response['success'] = false;
+    $response['message'] = "Registration failed: Unable to send verification email. Please try again later or contact support.";
+}
     } catch (PDOException $e) {
         $response['message'] = "Database error: " . $e->getMessage();
     }
