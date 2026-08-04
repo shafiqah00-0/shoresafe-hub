@@ -184,7 +184,7 @@ $mail->SMTPOptions = array(
         if ($email_sent) {
     $response['success']  = true;
     $response['message']  = "Registration submitted! Please check your email for your 6-digit verification code.";
-    $response['redirect'] = "verify_email.php?email=" . urlencode($email);
+    $response['redirect'] = "/logic/controller/verify_email.php?email=" . urlencode($email);
 } else {
     // Fail registration response so AJAX alerts the user and doesn't redirect
     $response['success'] = false;
