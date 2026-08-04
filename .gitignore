@@ -2,3 +2,4 @@
 .env.local
 test.php
 config/database.php
+/vendor/

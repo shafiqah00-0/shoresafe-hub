@@ -1,6 +1,10 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 header('Content-Type: application/json');
 
@@ -75,6 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 4. GENERATE 6-DIGIT VERIFICATION CODE & PREPARE STATUS
         $verification_code = sprintf("%06d", random_int(100000, 999999));
 
+        $status = 'pending';
+        $email_verified = 0; 
+
         // Public users are auto-active and auto-verified (1 / true)
         // Authorities & Stakeholders start as pending and unverified (0 / false)
         // if ($user_type === 'public') 
@@ -82,8 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         //     $status = 'active';
         //     $email_verified = 0; 
         // } else {
-            $status = 'pending';
-            $email_verified = 0; 
+            // $status = 'pending';
+            // $email_verified = 0; 
         // }
 
         // 5. INSERT USER RECORD
@@ -107,33 +114,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // 6. SEND VERIFICATION CODE EMAIL FOR AUTHORITIES & STAKEHOLDERS
-        if ($user_type == 'public') {
-            $subject = "Your Verification Code - ShoreSafe";
-            $message = "Hello " . htmlspecialchars($full_name) . ",\n\n";
-            $message .= "Thank you for registering on ShoreSafe.\n\n";
-            // $message .= "Thank you for registering as an official " . ucfirst($user_type) . " on ShoreSafe.\n\n";
-            $message .= "Your 6-digit verification code is:\n";
-            $message .= "========================\n";
-            $message .= "        " . $verification_code . "\n";
-            $message .= "========================\n\n";
-            $message .= "Please enter this code on the verification page to complete your registration.\n";
-            // $message .= "Once verified, your account will be sent to the administrator for final review.";
+        // if ($user_type == 'public') {
+        //     $subject = "Your Verification Code - ShoreSafe";
+        //     $message = "Hello " . htmlspecialchars($full_name) . ",\n\n";
+        //     $message .= "Thank you for registering on ShoreSafe.\n\n";
+        //     // $message .= "Thank you for registering as an official " . ucfirst($user_type) . " on ShoreSafe.\n\n";
+        //     $message .= "Your 6-digit verification code is:\n";
+        //     $message .= "========================\n";
+        //     $message .= "        " . $verification_code . "\n";
+        //     $message .= "========================\n\n";
+        //     $message .= "Please enter this code on the verification page to complete your registration.\n";
+        //     // $message .= "Once verified, your account will be sent to the administrator for final review.";
 
-            $headers = "From: no-reply@shoresafe.com\r\n";
-            $headers .= "Reply-To: support@shoresafe.com\r\n";
+        //     $headers = "From: no-reply@shoresafe.com\r\n";
+        //     $headers .= "Reply-To: support@shoresafe.com\r\n";
 
-            // Send email using PHP mail()
-            @mail($email, $subject, $message, $headers);
+        //     // Send email using PHP mail()
+        //     @mail($email, $subject, $message, $headers);
 
-            $response['success'] = true;
-            $response['message'] = "Registration submitted! Please check your email for your 6-digit verification code.";
-            // Redirect user to your code entry page (e.g., verify_code page passing email)
-            $response['redirect'] = "/index.php?page=verify_email=" . urlencode($email);
-        } else {
-            $response['success'] = true;
-            $response['message'] = "Registration successful!";
-            $response['redirect'] = "/index.php?page=login";
+        //     $response['success'] = true;
+        //     $response['message'] = "Registration submitted! Please check your email for your 6-digit verification code.";
+        //     // Redirect user to your code entry page (e.g., verify_code page passing email)
+        //     $response['redirect'] = "/index.php?page=verify_email=" . urlencode($email);
+        // } else {
+        //     $response['success'] = true;
+        //     $response['message'] = "Registration successful!";
+        //     $response['redirect'] = "/index.php?page=login";
+        // }
+
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'iqashafiqaho9@gmail.com';       // Your Gmail
+            $mail->Password   = 'azwu ytwf lpca bfid'; // Google App Password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            $mail->setFrom('iqashafiqaho9@gmail.com', 'ShoreSafe System');
+            $mail->addAddress($email, $full_name);
+
+            $mail->isHTML(false);
+            $mail->Subject = 'Your Verification Code - ShoreSafe';
+            $mail->Body    = "Hello " . $full_name . ",\n\nYour 6-digit verification code is: " . $verification_code;
+
+            $mail->send();
+        } catch (Exception $e) {
+            // Mail sending error (you can log $mail->ErrorInfo here if needed)
         }
+
+        // Always return success & redirect to verify_email.php
+        $response['success'] = true;
+        $response['message'] = "Registration submitted! Please check your email for your 6-digit verification code.";
+        $response['redirect'] = "/logic/controller/verify_email.php?email=" . urlencode($email);
 
     } catch (PDOException $e) {
         $response['message'] = "Database error: " . $e->getMessage();
