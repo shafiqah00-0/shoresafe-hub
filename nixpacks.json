@@ -1,7 +1,8 @@
 {
   "providers": ["php"],
   "nixPkgs": [
-    "php84Extensions.pdo_pgsql",
-    "php84Extensions.pgsql"
+    "phpExtensions.openssl",
+    "phpExtensions.pdo_pgsql",
+    "phpExtensions.pgsql"
   ]
 }

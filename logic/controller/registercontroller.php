@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         //     $response['redirect'] = "/index.php?page=login";
         // }
 
-$mail = new PHPMailer(true);
+        $mail = new PHPMailer(true);
         $email_sent = false;
 
         try {
@@ -153,10 +153,19 @@ $mail = new PHPMailer(true);
             // App Password without spaces
             $mail->Password   = 'azwuytwflpcabfid'; 
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
+            $mail->Port       = 465;
 
             // Optional: Timeout setting to prevent long hanging connections
-            $mail->Timeout    = 10; 
+            $mail->Timeout    = 20; 
+
+            // Disable SSL certificate verification for local development
+$mail->SMTPOptions = array(
+    'ssl' => array(
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+        'allow_self_signed' => true
+    )
+);
 
             $mail->setFrom('iqashafiqaho9@gmail.com', 'ShoreSafe System');
             $mail->addAddress($email, $full_name);
