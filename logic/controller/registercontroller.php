@@ -151,7 +151,7 @@ if (!$apiKey) {
     error_log("Resend API Key is missing from environment variables.");
 }
         $payload = [
-            'from'    => 'ShoreSafe <onboarding@resend.dev>',
+            'from'    => 'ShoreSafe <iqashafiqaho9@gmail.com>',
             'to'      => [$email],
             'subject' => 'Your Verification Code - ShoreSafe',
             'html'    => "<p>Hello " . htmlspecialchars($full_name) . ",</p><p>Your 6-digit verification code is: <strong>" . $verification_code . "</strong></p>"
