@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/../../config/database.php';
 
 $email = trim($_GET['email'] ?? $_POST['email'] ?? '');
 $message = '';
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <?php if (!$is_verified): ?>
-            <form action="" method="POST">
+            <form action="verify_email.php?email=<?php echo urlencode($email); ?>" method="POST">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($email); ?>" required placeholder="your@email.com">
