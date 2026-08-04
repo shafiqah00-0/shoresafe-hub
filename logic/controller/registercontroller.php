@@ -149,9 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'iqashafiqaho9@gmail.com'; 
-            // App Password without spaces
-            $mail->Password   = 'azwuytwflpcabfid'; 
+            $mail->Username   = getenv('SMTP_USER') ?: 'iqashafiqaho9@gmail.com'; 
+            $mail->Password   = getenv('SMTP_PASS') ?: 'azwuytwflpcabfid';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 465;
 
