@@ -143,42 +143,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // }
 
         $mail = new PHPMailer(true);
+        // Replace PHPMailer block with Resend HTTP API (Port 443 - Never Blocked)
         $email_sent = false;
+        $apiKey = getenv('RESEND_API_KEY') ?: 're_123456789...'; 
 
-        try {
-            $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = getenv('SMTP_USER') ?: 'iqashafiqaho9@gmail.com'; 
-            $mail->Password   = getenv('SMTP_PASS') ?: 'azwuytwflpcabfid';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port       = 465;
+        $payload = [
+            'from'    => 'ShoreSafe <onboarding@resend.dev>',
+            'to'      => [$email],
+            'subject' => 'Your Verification Code - ShoreSafe',
+            'html'    => "<p>Hello " . htmlspecialchars($full_name) . ",</p><p>Your 6-digit verification code is: <strong>" . $verification_code . "</strong></p>"
+        ];
 
-            // Optional: Timeout setting to prevent long hanging connections
-            $mail->Timeout    = 20; 
+        $ch = curl_init('https://api.resend.com/emails');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $apiKey,
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-            // Disable SSL certificate verification for local development
-$mail->SMTPOptions = array(
-    'ssl' => array(
-        'verify_peer' => false,
-        'verify_peer_name' => false,
-        'allow_self_signed' => true
-    )
-);
+        $result   = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-            $mail->setFrom('iqashafiqaho9@gmail.com', 'ShoreSafe System');
-            $mail->addAddress($email, $full_name);
-
-            $mail->isHTML(false);
-            $mail->Subject = 'Your Verification Code - ShoreSafe';
-            $mail->Body    = "Hello " . $full_name . ",\n\nYour 6-digit verification code is: " . $verification_code;
-
-            $mail->send();
+        if ($httpCode === 200 || $httpCode === 201) {
             $email_sent = true;
-        } catch (Exception $e) {
-            // Log mail error message to PHP error log for debugging
-            error_log("Mailer Error: " . $mail->ErrorInfo);
+        } else {
+            error_log("Resend API Failure [Code $httpCode]: " . $result);
         }
+
+//         try {
+//             $mail->isSMTP();
+//             $mail->Host       = 'smtp.gmail.com';
+//             $mail->SMTPAuth   = true;
+//             $mail->Username   = getenv('SMTP_USER') ?: 'iqashafiqaho9@gmail.com'; 
+//             $mail->Password   = getenv('SMTP_PASS') ?: 'azwuytwflpcabfid';
+//             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+//             $mail->Port       = 465;
+
+//             // Optional: Timeout setting to prevent long hanging connections
+//             $mail->Timeout    = 20; 
+
+//             // Disable SSL certificate verification for local development
+// $mail->SMTPOptions = array(
+//     'ssl' => array(
+//         'verify_peer' => false,
+//         'verify_peer_name' => false,
+//         'allow_self_signed' => true
+//     )
+// );
+
+//             $mail->setFrom('iqashafiqaho9@gmail.com', 'ShoreSafe System');
+//             $mail->addAddress($email, $full_name);
+
+//             $mail->isHTML(false);
+//             $mail->Subject = 'Your Verification Code - ShoreSafe';
+//             $mail->Body    = "Hello " . $full_name . ",\n\nYour 6-digit verification code is: " . $verification_code;
+
+//             $mail->send();
+//             $email_sent = true;
+//         } catch (Exception $e) {
+//             // Log mail error message to PHP error log for debugging
+//             error_log("Mailer Error: " . $mail->ErrorInfo);
+//         }
 
         // Always return success & set redirect URL so frontend AJAX can navigate
         if ($email_sent) {
