@@ -145,8 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail = new PHPMailer(true);
         // Replace PHPMailer block with Resend HTTP API (Port 443 - Never Blocked)
         $email_sent = false;
-        $apiKey = getenv('RESEND_API_KEY') ?: 're_123456789...'; 
+        $apiKey = getenv('RESEND_API_KEY');
 
+if (!$apiKey) {
+    error_log("Resend API Key is missing from environment variables.");
+}
         $payload = [
             'from'    => 'ShoreSafe <onboarding@resend.dev>',
             'to'      => [$email],
