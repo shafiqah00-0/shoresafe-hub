@@ -142,16 +142,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         //     $response['redirect'] = "/index.php?page=login";
         // }
 
-        $mail = new PHPMailer(true);
+$mail = new PHPMailer(true);
+        $email_sent = false;
 
         try {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'iqashafiqaho9@gmail.com';       // Your Gmail
-            $mail->Password   = 'azwu ytwf lpca bfid'; // Google App Password
+            $mail->Username   = 'iqashafiqaho9@gmail.com'; 
+            // App Password without spaces
+            $mail->Password   = 'azwuytwflpcabfid'; 
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
+
+            // Optional: Timeout setting to prevent long hanging connections
+            $mail->Timeout    = 10; 
 
             $mail->setFrom('iqashafiqaho9@gmail.com', 'ShoreSafe System');
             $mail->addAddress($email, $full_name);
@@ -161,14 +166,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Body    = "Hello " . $full_name . ",\n\nYour 6-digit verification code is: " . $verification_code;
 
             $mail->send();
+            $email_sent = true;
         } catch (Exception $e) {
-            // Mail sending error (you can log $mail->ErrorInfo here if needed)
+            // Log mail error message to PHP error log for debugging
+            error_log("Mailer Error: " . $mail->ErrorInfo);
         }
 
-        // Always return success & redirect to verify_email.php
+        // Always return success & set redirect URL so frontend AJAX can navigate
         $response['success'] = true;
-        $response['message'] = "Registration submitted! Please check your email for your 6-digit verification code.";
-        $response['redirect'] = "/logic/controller/verify_email.php?email=" . urlencode($email);
+        $response['message'] = $email_sent 
+            ? "Registration submitted! Please check your email for your 6-digit verification code." 
+            : "Registration submitted! (Email could not be delivered directly, please check your database for the verification code).";
+        
+        // Relative redirect path pointing directly to verify_email.php in the same folder
+        $response['redirect'] = "verify_email.php?email=" . urlencode($email);
 
     } catch (PDOException $e) {
         $response['message'] = "Database error: " . $e->getMessage();

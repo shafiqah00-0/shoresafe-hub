@@ -162,49 +162,63 @@
         }
 
         // AJAX Submission
-        const form = document.getElementById('registerForm');
-        const alertMsg = document.getElementById('alert-msg');
-        const submitBtn = document.getElementById('submitBtn');
+// AJAX Submission
+const form = document.getElementById('registerForm');
+const alertMsg = document.getElementById('alert-msg');
+const submitBtn = document.getElementById('submitBtn');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
-            
-            const formData = new FormData(form);
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Processing...";
+    alertMsg.style.display = 'none';
+    
+    const formData = new FormData(form);
 
-            try {
-                const response = await fetch('/logic/controller/registercontroller.php', { 
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                alertMsg.style.display = 'block';
-                alertMsg.innerText = data.message;
-                
-                if (data.success) {
-                    alertMsg.style.background = '#d1edda';
-                    alertMsg.style.color = '#155724';
-                    setTimeout(() => {
-                        window.location.href = data.redirect;
-                    }, 2000);
-                } else {
-                    alertMsg.style.background = '#f8d7da';
-                    alertMsg.style.color = '#721c24';
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Register Now";
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alertMsg.style.display = 'block';
-                alertMsg.innerText = "An error occurred. Please try again.";
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Register Now";
-            }
+    try {
+        const response = await fetch('/logic/controller/registercontroller.php', { 
+            method: 'POST',
+            body: formData
         });
+
+        // Parse JSON response safely
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (err) {
+            console.error("Non-JSON Server Response:", text);
+            throw new Error("Server returned an unexpected response.");
+        }
+
+        alertMsg.style.display = 'block';
+        alertMsg.innerText = data.message;
+        
+        if (data.success) {
+            alertMsg.style.background = '#d1edda';
+            alertMsg.style.color = '#155724';
+            setTimeout(() => {
+                window.location.href = data.redirect;
+            }, 1500);
+        } else {
+            alertMsg.style.background = '#f8d7da';
+            alertMsg.style.color = '#721c24';
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Register Now";
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alertMsg.style.display = 'block';
+        alertMsg.style.background = '#f8d7da';
+        alertMsg.style.color = '#721c24';
+        alertMsg.innerText = error.message || "An error occurred. Please try again.";
+        
+        // Reset submit button state on failure
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Register Now";
+    }
+});
     </script>
 </body>
 </html>
