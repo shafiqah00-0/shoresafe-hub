@@ -66,7 +66,7 @@ $stmt = $pdo->query("
           WHERE r2.locationid = r.locationid
             AND LOWER(a2.status_update) = 'resolved'
       )
-    ORDER BY total_days_open DESC
+    ORDER BY total_days_open ASC
     LIMIT 1
 ");
 $in_progress_task = $stmt->fetch(PDO::FETCH_ASSOC);
