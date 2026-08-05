@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed,
             $full_name,
             $user_type,
-            !empty($reg_number) ? $reg_number : N/A,
+            !empty($reg_number) ? $reg_number : 'N/A',
             $status,
             $verification_code,
             $email_verified
