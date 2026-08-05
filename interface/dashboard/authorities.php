@@ -3,44 +3,91 @@ session_start();
 
 $role = $_SESSION['role_type'] ?? 'authorities';
 
-// DB connection if needed
+// DB connection
 require_once __DIR__ . '/../../config/database.php';
 
+// --- METRICS & COUNTS ---
 $stmt = $pdo->query("SELECT COUNT(*) FROM report");
 $total_reports = $stmt->fetchColumn();
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM generated_analysis WHERE analysisid>0 AND erosion_risk IS NOT NULL AND erosion_risk != '';");
+$stmt = $pdo->query("SELECT COUNT(*) FROM generated_analysis WHERE analysisid > 0 AND erosion_risk IS NOT NULL AND erosion_risk != '';");
 $total_risk = $stmt->fetchColumn();
 
 $stmt = $pdo->query("SELECT COUNT(*) FROM report WHERE authoritiesid IS NULL");
 $total_verify = $stmt->fetchColumn();
 
+// Count locations currently "In Progress" (and not yet resolved)
+$stmt = $pdo->query("
+    SELECT COUNT(DISTINCT r.locationid) 
+    FROM action_authorities a 
+    JOIN report r ON a.authoritiesid = r.authoritiesid 
+    WHERE LOWER(a.status_update) IN ('in progress', 'action taken')
+      AND NOT EXISTS (
+          SELECT 1 FROM action_authorities a2 
+          JOIN report r2 ON a2.authoritiesid = r2.authoritiesid 
+          WHERE r2.locationid = r.locationid AND LOWER(a2.status_update) = 'resolved'
+      )
+");
+$total_in_progress = $stmt->fetchColumn();
+
+// Count locations successfully "Resolved"
+$stmt = $pdo->query("
+    SELECT COUNT(DISTINCT r.locationid) 
+    FROM action_authorities a 
+    JOIN report r ON a.authoritiesid = r.authoritiesid 
+    WHERE LOWER(a.status_update) = 'resolved'
+");
+$total_resolved = $stmt->fetchColumn();
+
+
+// --- RECENT ACTIVITY DATA ---
 $stmt = $pdo->query("SELECT r.report_date, l.exact_location, l.state, l.district FROM report r LEFT JOIN location l ON r.locationid = l.locationid ORDER BY r.report_date DESC LIMIT 1");
 $new_reports = $stmt->fetch(PDO::FETCH_ASSOC);
 $display_date = $new_reports ? date("d M Y", strtotime($new_reports['report_date'])) : 'No date';
 
-$stmt = $pdo->query("SELECT r.report_date, l.exact_location, l.state, l.district FROM report r LEFT JOIN location l ON r.locationid = l.locationid WHERE analysisid IS NULL ORDER BY r.report_date DESC");
+$stmt = $pdo->query("SELECT r.report_date, l.exact_location, l.state, l.district FROM report r LEFT JOIN location l ON r.locationid = l.locationid WHERE analysisid IS NULL ORDER BY r.report_date DESC LIMIT 1");
 $pending_reports = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// UPDATED: Inverted the JOIN condition since r.analysisid points to g.analysisid
+// Fetch latest "In Progress" location needing priority action
 $stmt = $pdo->query("
     SELECT 
-        g.anaysis_update, 
         l.exact_location, 
-        l.state, 
-        l.district 
-    FROM generated_analysis g
-    LEFT JOIN report r ON r.analysisid = g.analysisid
-    LEFT JOIN location l ON r.locationid = l.locationid 
-    WHERE r.authoritiesid IS NOT NULL 
-    ORDER BY g.anaysis_update DESC 
+        r.report_date,
+        a.update_date AS action_date, 
+        (CURRENT_DATE - r.report_date) AS total_days_open
+    FROM action_authorities a 
+    JOIN report r ON a.authoritiesid = r.authoritiesid 
+    JOIN location l ON r.locationid = l.locationid
+    WHERE LOWER(a.status_update) IN ('in progress', 'action taken')
+      AND NOT EXISTS (
+          SELECT 1 
+          FROM action_authorities a2
+          JOIN report r2 ON a2.authoritiesid = r2.authoritiesid
+          WHERE r2.locationid = r.locationid
+            AND LOWER(a2.status_update) = 'resolved'
+      )
+    ORDER BY total_days_open DESC
     LIMIT 1
 ");
-$completed_task = $stmt->fetch(PDO::FETCH_ASSOC);
+$in_progress_task = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Uses 'anaysis_update' string timestamp to formulate live audit log date
-$completed_date = ($completed_task && !empty($completed_task['anaysis_update'])) 
-    ? date("d M Y", strtotime($completed_task['anaysis_update'])) 
+// Fetch latest "Resolved" location info
+$stmt = $pdo->query("
+    SELECT 
+        l.exact_location, 
+        r.report_date,
+        a.update_date AS resolved_date, 
+        (a.update_date - r.report_date) AS action_period
+    FROM action_authorities a 
+    JOIN report r ON a.authoritiesid = r.authoritiesid 
+    JOIN location l ON r.locationid = l.locationid
+    WHERE LOWER(a.status_update) = 'resolved'
+    ORDER BY a.update_date DESC
+    LIMIT 1
+");
+$resolved_task = $stmt->fetch(PDO::FETCH_ASSOC);
+$resolved_date = ($resolved_task && !empty($resolved_task['resolved_date'])) 
+    ? date("d M Y", strtotime($resolved_task['resolved_date'])) 
     : 'No date';
 ?>
 <!DOCTYPE html>
@@ -96,61 +143,88 @@ $completed_date = ($completed_task && !empty($completed_task['anaysis_update']))
         </div>
     </header>
 
-    <div class="analytics-filter-ribbon" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 30px;">
-        <div style="display: flex; gap: 32px; align-items: center;">
+    <!-- Priority Analytics Filter Ribbon -->
+    <div class="analytics-filter-ribbon" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 20px;">
+        <div style="display: flex; gap: 24px; align-items: center;">
             <div class="ribbon-metric active" onclick="updateRibbonContext('all', this)" style="cursor:pointer;">
-                <span class="ribbon-dot" style="background: #3b82f6; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;"></span>
+                <span class="ribbon-dot" style="background: #64748b; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;"></span>
                 <span class="ribbon-label">All Reports: <strong><?= $total_reports ?></strong></span>
             </div>
-            <div class="ribbon-metric" onclick="updateRibbonContext('high', this)" style="cursor:pointer;">
-                <span class="ribbon-dot" style="background: #ef4444; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;"></span>
-                <span class="ribbon-label">Hotspots: <strong class="text-danger"><?= $total_risk ?></strong></span>
+            <!-- In Progress (Prioritised) -->
+            <div class="ribbon-metric" onclick="updateRibbonContext('in_progress', this)" style="cursor:pointer;">
+                <span class="ribbon-dot" style="background: #3b82f6; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;"></span>
+                <span class="ribbon-label">In Progress: <strong style="color:#2563eb;"><?= $total_in_progress ?></strong></span>
             </div>
+            <!-- Pending -->
             <div class="ribbon-metric" onclick="updateRibbonContext('pending', this)" style="cursor:pointer;">
                 <span class="ribbon-dot" style="background: #f59e0b; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;"></span>
-                <span class="ribbon-label">Pending: <strong class="text-warning"><?= $total_verify ?></strong></span>
+                <span class="ribbon-label">Pending: <strong style="color:#d97706;"><?= $total_verify ?></strong></span>
+            </div>
+            <!-- Resolved Locations -->
+            <div class="ribbon-metric" onclick="updateRibbonContext('resolved', this)" style="cursor:pointer;">
+                <span class="ribbon-dot" style="background: #10b981; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;"></span>
+                <span class="ribbon-label">Resolved Locations: <strong style="color:#059669;"><?= $total_resolved ?></strong></span>
             </div>
         </div>
 
-        <div style="flex-grow: 1; max-width: 400px; display: flex; flex-direction: column; gap: 6px;">
+        <!-- Tiered Progress Bar -->
+        <div style="flex-grow: 1; max-width: 360px; display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; font-weight: 600;">
-                <span>Overall Report Progress</span>
-                <span><?= $total_reports > 0 ? round((($total_reports - $total_verify) / $total_reports) * 100) : 0 ?>% Actioned</span>
+                <span>Resolution Progress</span>
+                <span><?= $total_reports > 0 ? round(($total_resolved / $total_reports) * 100) : 0 ?>% Resolved</span>
             </div>
             <div style="display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: #f1f5f9; width: 100%;">
                 <?php 
-                    $verified_pct = $total_reports > 0 ? (($total_reports - $total_verify) / $total_reports) * 100 : 0;
-                    $pending_pct = $total_reports > 0 ? ($total_verify / $total_reports) * 100 : 0;
+                    $resolved_pct    = $total_reports > 0 ? ($total_resolved / $total_reports) * 100 : 0;
+                    $in_progress_pct = $total_reports > 0 ? ($total_in_progress / $total_reports) * 100 : 0;
+                    $pending_pct     = $total_reports > 0 ? ($total_verify / $total_reports) * 100 : 0;
                 ?>
-                <div style="width: <?= $verified_pct ?>%; background: #3b82f6;" title="Verified Tasks"></div>
+                <div style="width: <?= $resolved_pct ?>%; background: #10b981;" title="Resolved Locations"></div>
+                <div style="width: <?= $in_progress_pct ?>%; background: #3b82f6;" title="In Progress Tasks"></div>
                 <div style="width: <?= $pending_pct ?>%; background: #f59e0b;" title="Pending Tasks"></div>
             </div>
         </div>
     </div>
 
     <div class="section-title" style="margin: 2rem 0 1rem 0; font-weight: bold; color: #4a5568;">
-        Live Report Activity Tracking 
+        Live Report Activity & Action Stream
     </div>
 
     <div class="audit-stream-container" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
         <div class="stream-timeline" style="display:flex; flex-direction:column; gap:20px; position:relative; padding-left: 20px; border-left: 2px dashed #e2e8f0;">
             
-            <?php if ($completed_task): ?>
+            <!-- High Priority: In Progress Action Item -->
+            <?php if ($in_progress_task): ?>
                 <div class="stream-item" style="position:relative;">
                     <span style="position:absolute; left:-27px; top:2px; background:#eff6ff; color:#3b82f6; width:12px; height:12px; border-radius:50%; border:3px solid #ffffff; box-shadow:0 0 0 2px #3b82f6;"></span>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="font-size:0.9rem; color:#0f172a;"><i class="fas fa-check-circle" style="color: #3b82f6; margin-right: 4px;"></i> Assessment Task Completed</strong>
-                        <span style="font-size:0.75rem; color:#94a3b8;"><?= htmlspecialchars($completed_date) ?></span>
+                        <strong style="font-size:0.9rem; color:#1e40af;"><i class="fas fa-spinner fa-spin" style="margin-right:4px;"></i> Active Mitigation In Progress</strong>
+                        <span style="font-size:0.75rem; color:#2563eb; font-weight:600;"><?= htmlspecialchars($in_progress_task['total_days_open']) ?> days open</span>
                     </div>
-                    <p style="margin:0; font-size:0.85rem; color:#64748b;">
-                        The verification review process for <strong><?= htmlspecialchars($completed_task['exact_location']) ?></strong> has been finalized by system authorities.
+                    <p style="margin:0; font-size:0.85rem; color:#475569;">
+                        Field actions are currently active at <strong><?= htmlspecialchars($in_progress_task['exact_location']) ?></strong>. Awaiting final resolution confirmation.
                     </p>
                 </div>
             <?php endif; ?>
 
-            <?php if ($new_reports): ?>
+            <!-- Resolved Location Notification -->
+            <?php if ($resolved_task): ?>
                 <div class="stream-item" style="position:relative;">
                     <span style="position:absolute; left:-27px; top:2px; background:#ecfdf5; color:#10b981; width:12px; height:12px; border-radius:50%; border:3px solid #ffffff; box-shadow:0 0 0 2px #10b981;"></span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="font-size:0.9rem; color:#065f46;"><i class="fas fa-check-circle" style="color: #10b981; margin-right: 4px;"></i> Location Issue Resolved</strong>
+                        <span style="font-size:0.75rem; color:#94a3b8;"><?= htmlspecialchars($resolved_date) ?></span>
+                    </div>
+                    <p style="margin:0; font-size:0.85rem; color:#64748b;">
+                        Coastal protection measures at <strong><?= htmlspecialchars($resolved_task['exact_location']) ?></strong> have been successfully completed and marked as resolved.
+                    </p>
+                </div>
+            <?php endif; ?>
+
+            <!-- New Report Submission -->
+            <?php if ($new_reports): ?>
+                <div class="stream-item" style="position:relative;">
+                    <span style="position:absolute; left:-27px; top:2px; background:#f0f9ff; color:#0284c7; width:12px; height:12px; border-radius:50%; border:3px solid #ffffff; box-shadow:0 0 0 2px #0284c7;"></span>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                         <strong style="font-size:0.9rem; color:#0f172a;">Latest Environmental Report Submitted</strong>
                         <span style="font-size:0.75rem; color:#94a3b8;"><?= htmlspecialchars($display_date) ?></span>
@@ -159,10 +233,9 @@ $completed_date = ($completed_task && !empty($completed_task['anaysis_update']))
                         A new assessment has been logged for <strong><?= htmlspecialchars($new_reports['exact_location']) ?></strong> (<?= htmlspecialchars($new_reports['district']) ?>, <?= htmlspecialchars($new_reports['state']) ?>).
                     </p>
                 </div>
-            <?php else: ?>
-                <p style="font-size:0.85rem; color:#64748b;">No recent reports found.</p>
             <?php endif; ?>
 
+            <!-- Pending Review Requirement -->
             <?php if ($pending_reports): ?>
                 <div class="stream-item" style="position:relative;">
                     <span style="position:absolute; left:-27px; top:2px; background:#fffbf2; color:#f59e0b; width:12px; height:12px; border-radius:50%; border:3px solid #ffffff; box-shadow:0 0 0 2px #f59e0b;"></span>
@@ -170,20 +243,11 @@ $completed_date = ($completed_task && !empty($completed_task['anaysis_update']))
                         <strong style="font-size:0.9rem; color:#0f172a;">Pending Assessment Required</strong>
                     </div>
                     <p style="margin:0; font-size:0.85rem; color:#64748b;">
-                        <strong><?= htmlspecialchars($pending_reports['exact_location']) ?></strong> (<?= htmlspecialchars($pending_reports['district']) ?>) status is currently <span style="color:#f59e0b; font-weight:700;">AWAITING EVALUATION</span>.
+                        <strong><?= htmlspecialchars($pending_reports['exact_location']) ?></strong> (<?= htmlspecialchars($pending_reports['district']) ?>) is currently <span style="color:#f59e0b; font-weight:700;">AWAITING EVALUATION</span>.
                     </p>
                 </div>
-            <?php else: ?>
-                <div class="stream-item" style="position:relative;">
-                    <span style="position:absolute; left:-27px; top:2px; background:#f0fdf4; color:#16a34a; width:12px; height:12px; border-radius:50%; border:3px solid #ffffff; box-shadow:0 0 0 2px #16a34a;"></span>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="font-size:0.9rem; color:#0f172a;">All Assessments Cleared</strong>
-                        <span style="font-size:0.75rem; color:#94a3b8;">Just Now</span>
-                    </div>
-                    <p style="margin:0; font-size:0.85rem; color:#64748b;">No beaches are currently awaiting risk evaluation overrides.</p>
-                </div>
             <?php endif; ?>
-            
+
         </div>
     </div>
 </main>
