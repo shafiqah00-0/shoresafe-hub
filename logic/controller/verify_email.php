@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $updateStmt = $pdo->prepare("UPDATE users SET email_verified = 1, verification_token = NULL WHERE userid = ?");
                 $updateStmt->execute([$user['userid']]);
                 
-                $message = "Email successfully verified! Your account has been forwarded to the Administrator for approval.";
+                $message = "Email successfully verified! Please login back after 24h for administration approval.";
                 $is_verified = true;
             }
         } else {
