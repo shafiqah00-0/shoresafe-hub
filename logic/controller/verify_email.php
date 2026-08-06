@@ -7,7 +7,7 @@ $is_verified = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (empty($email) || empty($code)) {
+    if (empty($email) ) {
         $message = "Please provide both your email and the 6-digit verification code.";
     } else {
         // Find user matching email and code
