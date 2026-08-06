@@ -39,13 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     // Check Authority Domain (.gov requirement)
-    if ($user_type === 'authorities') {
-        if (!str_contains($domain, '.gov')) {
-            $response['message'] = "Authorities must use an official government email address (e.g., officer@agency.gov.my).";
-            echo json_encode($response);
-            exit;
-        }
-    }
+    // if ($user_type === 'authorities') {
+    //     if (!str_contains($domain, '.gov')) {
+    //         $response['message'] = "Authorities must use an official government email address (e.g., officer@agency.gov.my).";
+    //         echo json_encode($response);
+    //         exit;
+    //     }
+    // }
 
     // Check Stakeholder & Authority domain (Block free/public email providers)
     if ($user_type === 'authorities' || $user_type === 'stakeholders') {
@@ -83,8 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email_verified = 0; 
         }
         else
+            {
                 $status = 'active';
                 $email_verified = 1; 
+        }
+              
         // 5. INSERT USER RECORD
         $hashed = password_hash($password, PASSWORD_DEFAULT);
 
