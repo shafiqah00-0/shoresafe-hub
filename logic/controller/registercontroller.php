@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $pdo->prepare("
-            INSERT INTO users (username, email, password, full_name, role_type, reg_number, status, verification_token, email_verified)
+            INSERT INTO users (username, email, password, full_name, role_type, reg_number, status,  email_verified)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
@@ -104,7 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user_type,
             !empty($reg_number) ? $reg_number : 'N/A',
             $status,
-            $verification_code,
             $email_verified
         ]);
 
