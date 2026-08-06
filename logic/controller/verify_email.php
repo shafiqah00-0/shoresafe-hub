@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Find user matching email and code
         $stmt = $pdo->prepare("SELECT userid, email_verified FROM users WHERE email = ?");
-        $stmt->execute([$email, $code]);
+        $stmt->execute([$email]);
         $user = $stmt->fetch();
 
         if ($user) {
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $is_verified = true;
             }
         } else {
-            $message = "Invalid verification code or email address. Please try again.";
+            $message = " email address. Please try again.";
         }
     }
 }
