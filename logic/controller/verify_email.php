@@ -6,7 +6,6 @@ $message = '';
 $is_verified = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $code = trim($_POST['verification_code'] ?? '');
 
     if (empty($email) || empty($code)) {
         $message = "Please provide both your email and the 6-digit verification code.";
@@ -22,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $is_verified = true;
             } else {
                 // Update email_verified status and clear verification code
-                $updateStmt = $pdo->prepare("UPDATE users SET email_verified = 1, verification_token = NULL WHERE userid = ?");
+                $updateStmt = $pdo->prepare("UPDATE users SET email_verified = 1 WHERE userid = ?");
                 $updateStmt->execute([$user['userid']]);
                 
                 $message = "Email successfully verified! Please login back after 24h for administration approval.";
