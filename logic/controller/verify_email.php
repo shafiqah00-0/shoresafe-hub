@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Please provide both your email and the 6-digit verification code.";
     } else {
         // Find user matching email and code
-        $stmt = $pdo->prepare("SELECT userid, email_verified FROM users WHERE email = ? AND verification_token = ?");
+        $stmt = $pdo->prepare("SELECT userid, email_verified FROM users WHERE email = ?");
         $stmt->execute([$email, $code]);
         $user = $stmt->fetch();
 
