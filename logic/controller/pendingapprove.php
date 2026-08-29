@@ -2,16 +2,9 @@
 // /logic/controller/get_pending_users.php
 require_once __DIR__ . '/../../config/database.php';
 
-// Catch tab role parameter (defaults to 'authorities')
-$role = $_GET['role'] ?? 'authorities';
-
-// Sanitize allowed tab values
-if (!in_array($role, ['authorities', 'stakeholders'])) {
-    $role = 'authorities';
-}
 
 // Fetch pending users based on tab selection
-$stmt = $pdo->prepare("SELECT userid, full_name, role_type, reg_number, email FROM users WHERE status = 'pending' AND role_type = :role");
+$stmt = $pdo->prepare("SELECT userid, full_name, role_type, reg_number, email FROM users WHERE status = 'pending' AND role_type IN ('authorities','stakeholder')");
 $stmt->execute(['role' => $role]);
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
