@@ -2,30 +2,42 @@
 // /logic/controller/get_pending_users.php
 require_once __DIR__ . '/../../config/database.php';
 
-// Fetch all pending users
-$stmt = $pdo->query("SELECT userid, full_name, role_type, reg_number FROM users WHERE status = 'pending'");
+// Catch tab role parameter (defaults to 'authorities')
+$role = $_GET['role'] ?? 'authorities';
+
+// Sanitize allowed tab values
+if (!in_array($role, ['authorities', 'stakeholders'])) {
+    $role = 'authorities';
+}
+
+// Fetch pending users based on tab selection
+$stmt = $pdo->prepare("SELECT userid, full_name, role_type, reg_number, email FROM users WHERE status = 'pending' AND role_type = :role");
+$stmt->execute(['role' => $role]);
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (empty($users)) {
-    echo "<p style='text-align:center; padding: 20px;'>No pending registrations found.</p>";
+    echo "<p style='text-align:center; padding: 20px; color: #a0aec0;'>No pending " . htmlspecialchars($role) . " found.</p>";
 } else {
     echo "<table class='audit-table' style='width:100%; border-collapse: collapse;'>";
     echo "<thead style='background: #f7fafc;'><tr>
-            <th style='padding: 10px; text-align: left;'>Name</th>
-            <th style='padding: 10px; text-align: left;'>Role</th>
-            <th style='padding: 10px; text-align: left;'>Reg#</th>
-            <th style='padding: 10px; text-align: center;'>Action</th>
+            <th style='padding: 10px; text-align: left; color: #4a5568;'>Name</th>
+            <th style='padding: 10px; text-align: left; color: #4a5568;'>Role</th>
+            <th style='padding: 10px; text-align: left; color: #4a5568;'>Reg#</th>
+            <th style='padding: 10px; text-align: center; color: #4a5568;'>Action</th>
           </tr></thead><tbody>";
     
     foreach ($users as $u) {
-        echo "<tr>
-            <td style='padding: 10px; color: white;'>{$u['full_name']}</td>
-            <td style='padding: 10px; color: white;'>{$u['role_type']}</td>
-            <td style='padding: 10px; color: white;'>{$u['reg_number']}</td>
+        // Encode user object safely for JavaScript consumption
+        $jsonUserData = htmlspecialchars(json_encode($u), ENT_QUOTES, 'UTF-8');
+        
+        echo "<tr style='border-bottom: 1px solid #edf2f7;'>
+            <td style='padding: 10px; font-weight: 500;'>" . htmlspecialchars($u['full_name']) . "</td>
+            <td style='padding: 10px; color: #718096;'>" . htmlspecialchars($u['role_type']) . "</td>
+            <td style='padding: 10px; color: #718096;'>" . htmlspecialchars($u['reg_number']) . "</td>
             <td style='padding: 10px; text-align: center;'>
-                <button type='button' class='btn-approve-user' data-userid='{$u['userid']}' 
-                        style='background:#48bb78; color:white; border:none; padding:5px 12px; cursor:pointer; border-radius:4px;'>
-                    Approve
+                <button type='button' onclick='openUserDetailModal({$jsonUserData})' 
+                        style='background:#3182ce; color:white; border:none; padding:5px 12px; cursor:pointer; border-radius:4px;'>
+                    <i class='fas fa-eye'></i> View Details
                 </button>
             </td>
         </tr>";

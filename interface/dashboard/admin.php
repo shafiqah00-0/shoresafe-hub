@@ -1,5 +1,5 @@
 <?php 
-require_once __DIR__ . '/../../logic/controller/auditlogs.php';
+require_once __DIR__ . '/../../config/database.php';
 
 // Use a specific query to get only pending users
 $stmt = $pdo->query("SELECT COUNT(*) as total_pending FROM users WHERE status = 'pending'");
@@ -151,16 +151,53 @@ $total_pending = $pending_data['total_pending'];
             </div>
         </div>
     </div>
-    <div id="approval-modal" class="modal-overlay">
-    <div class="modal-card" style="width: 80%; max-width: 600px;">
+    <!-- Pending Approval Main Modal -->
+<div id="approval-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card" style="width: 80%; max-width: 650px;">
         <div class="modal-header">
-            <h3>Pending Registrations</h3>
+            <h3><i class="fas fa-user-clock"></i> Pending Registrations</h3>
             <button class="close-modal" onclick="closeApprovalModal()">&times;</button>
         </div>
+        
+        <!-- Tab Choices -->
+        <div class="pending-tabs" style="display: flex; gap: 10px; margin: 15px 0; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            <button id="tab-authorities" class="tab-btn active-tab" onclick="loadPendingUsers('authorities')" style="padding: 8px 16px; border: none; background: #ebf8ff; color: #2b6cb0; font-weight: 600; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-building"></i> Authorities
+            </button>
+            <button id="tab-stakeholders" class="tab-btn" onclick="loadPendingUsers('stakeholders')" style="padding: 8px 16px; border: none; background: #f7fafc; color: #4a5568; font-weight: 600; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-users"></i> Stakeholders
+            </button>
+        </div>
+
         <div class="modal-body" id="pending-list">
-            <p>Loading pending users...</p>
+            <p style="color:#a0aec0;">Loading pending users...</p>
         </div>
     </div>
+</div>
+
+<!-- User Detail Sub-Modal -->
+<div id="user-detail-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card" style="width: 90%; max-width: 450px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-id-card"></i> User Details</h3>
+            <button class="close-modal" onclick="closeUserDetailModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.95rem;">
+                <p><strong>Full Name:</strong> <span id="detail-name">-</span></p>
+                <p><strong>Role Type:</strong> <span id="detail-role">-</span></p>
+                <p><strong>Registration ID:</strong> <span id="detail-reg">-</span></p>
+                <p><strong>Email:</strong> <span id="detail-email">-</span></p>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeUserDetailModal()" style="padding: 8px 14px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer;">Close</button>
+                <button type="button" id="detail-approve-btn" class="btn-approve-user" style="padding: 8px 14px; background: #48bb78; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-check"></i> Approve User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
     <script>
 //         const sidebar = document.getElementById('sidebar');
