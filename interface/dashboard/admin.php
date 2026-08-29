@@ -342,7 +342,7 @@ function closeAuditModal() {
 // --- 2. Pending Approval Modal ---
 function openApprovalModal() {
     approvalModal.style.display = 'flex';
-    loadPendingUsers('all');
+    loadPendingUsers('authorities');
 }
 
 function closeApprovalModal() {
