@@ -163,85 +163,199 @@ $total_pending = $pending_data['total_pending'];
     </div>
 </div>
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const toggleBtn = document.getElementById('toggle-btn');
-        const toggleIcon = document.getElementById('toggle-icon');
+//         const sidebar = document.getElementById('sidebar');
+//         const mainContent = document.getElementById('main-content');
+//         const toggleBtn = document.getElementById('toggle-btn');
+//         const toggleIcon = document.getElementById('toggle-icon');
 
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
+//         toggleBtn.addEventListener('click', () => {
+//             sidebar.classList.toggle('collapsed');
+//             mainContent.classList.toggle('expanded');
             
-            if (sidebar.classList.contains('collapsed')) {
-                toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
-            } else {
-                toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
-            }
-        });
+//             if (sidebar.classList.contains('collapsed')) {
+//                 toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+//             } else {
+//                 toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+//             }
+//         });
 
-        // Function to trigger background download
-        function triggerBackup() {
-            document.getElementById('download_frame').src = '/logic/controller/db_backup.php';
-        }
+//         // Function to trigger background download
+//         function triggerBackup() {
+//             document.getElementById('download_frame').src = '/logic/controller/db_backup.php';
+//         }
 
-        const modal = document.getElementById('audit-modal');
-        const newPre = document.getElementById('modal-new-json');
+//         const modal = document.getElementById('audit-modal');
+//         const newPre = document.getElementById('modal-new-json');
 
-        function openAuditModal(newValuesRaw) {
-            try {
-                if (newValuesRaw && newValuesRaw !== '""' && newValuesRaw !== 'null' && newValuesRaw.trim() !== '') {
-                    let parsedData = JSON.parse(newValuesRaw);
-                    if (typeof parsedData === 'string') {
-                        parsedData = JSON.parse(parsedData);
-                    }
-                    newPre.textContent = JSON.stringify(parsedData, null, 4);
-                    newPre.style.color = "#48bb78";
-                } else {
-                    newPre.textContent = "NULL (Record Wiped out / Deleted / No Payload Data)";
-                    newPre.style.color = "#a0aec0";
-                }
-            } catch (e) {
-                console.error("JSON Parsing Error:", e);
-                newPre.textContent = newValuesRaw || "EMPTY PAYLOAD";
-                newPre.style.color = "#e53e3e";
-            }
-            modal.style.display = 'flex';
-        }
+//         function openAuditModal(newValuesRaw) {
+//             try {
+//                 if (newValuesRaw && newValuesRaw !== '""' && newValuesRaw !== 'null' && newValuesRaw.trim() !== '') {
+//                     let parsedData = JSON.parse(newValuesRaw);
+//                     if (typeof parsedData === 'string') {
+//                         parsedData = JSON.parse(parsedData);
+//                     }
+//                     newPre.textContent = JSON.stringify(parsedData, null, 4);
+//                     newPre.style.color = "#48bb78";
+//                 } else {
+//                     newPre.textContent = "NULL (Record Wiped out / Deleted / No Payload Data)";
+//                     newPre.style.color = "#a0aec0";
+//                 }
+//             } catch (e) {
+//                 console.error("JSON Parsing Error:", e);
+//                 newPre.textContent = newValuesRaw || "EMPTY PAYLOAD";
+//                 newPre.style.color = "#e53e3e";
+//             }
+//             modal.style.display = 'flex';
+//         }
 
-        function closeAuditModal() {
-            modal.style.display = 'none';
-        }
+//         function closeAuditModal() {
+//             modal.style.display = 'none';
+//         }
 
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeAuditModal();
-            }
-        }
+//         window.onclick = function(event) {
+//             if (event.target == modal) {
+//                 closeAuditModal();
+//             }
+//         }
        
 
-    const approvalModal = document.getElementById('approval-modal');
+//     const approvalModal = document.getElementById('approval-modal');
 
-    function openApprovalModal() {
-        approvalModal.style.display = 'flex';
-        // Fetch the pending users list from your new controller
-        fetch('/logic/controller/pendingapprove.php')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('pending-list').innerHTML = html;
-            });
+//     function openApprovalModal() {
+//         approvalModal.style.display = 'flex';
+//         // Fetch the pending users list from your new controller
+//         fetch('/logic/controller/pendingapprove.php')
+//             .then(response => response.text())
+//             .then(html => {
+//                 document.getElementById('pending-list').innerHTML = html;
+//             });
+//     }
+
+//     function closeApprovalModal() {
+//         approvalModal.style.display = 'none';
+//     }
+
+
+// // Ensure this is clearly defined in your <script> block
+// // Add this new listener to your <script> block
+// document.getElementById('pending-list').addEventListener('click', function(e) {
+//     // Check if the clicked element has the class 'btn-approve-user'
+//     if (e.target && e.target.classList.contains('btn-approve-user')) {
+//         const userid = e.target.getAttribute('data-userid');
+        
+//         if (confirm('Approve this user?')) {
+//             fetch('/logic/controller/approveuser.php', {
+//                 method: 'POST',
+//                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+//                 body: 'userid=' + encodeURIComponent(userid)
+//             })
+//             .then(res => res.json())
+//             .then(data => {
+//                 if (data.success) {
+//                     alert('User approved!');
+//                     openApprovalModal(); // Refresh modal content
+//                 } else {
+//                     alert('Error: ' + (data.message || 'Unknown error'));
+//                 }
+//             })
+//             .catch(err => console.error('Fetch error:', err));
+//         }
+//     }
+// });
+
+// // Global click handler to close modals
+// window.onclick = function(event) {
+//     if (event.target == modal) closeAuditModal();
+//     if (event.target == approvalModal) closeApprovalModal();
+// };
+
+       // ==========================================
+// CONSOLIDATED POPUP & MODAL CONTROLLER
+// ==========================================
+
+// Element References
+const auditModal = document.getElementById('audit-modal');
+const approvalModal = document.getElementById('approval-modal');
+const userDetailModal = document.getElementById('user-detail-modal');
+const newPre = document.getElementById('modal-new-json');
+
+// --- 1. Audit Inspection Modal ---
+function openAuditModal(newValuesRaw) {
+    try {
+        if (newValuesRaw && newValuesRaw !== '""' && newValuesRaw !== 'null' && String(newValuesRaw).trim() !== '') {
+            let parsedData = (typeof newValuesRaw === 'string') ? JSON.parse(newValuesRaw) : newValuesRaw;
+            newPre.textContent = JSON.stringify(parsedData, null, 4);
+            newPre.style.color = "#48bb78";
+        } else {
+            newPre.textContent = "NULL (Record Wiped out / Deleted / No Payload Data)";
+            newPre.style.color = "#a0aec0";
+        }
+    } catch (e) {
+        console.error("JSON Parsing Error:", e);
+        newPre.textContent = newValuesRaw || "EMPTY PAYLOAD";
+        newPre.style.color = "#e53e3e";
     }
+    auditModal.style.display = 'flex';
+}
 
-    function closeApprovalModal() {
-        approvalModal.style.display = 'none';
+function closeAuditModal() {
+    auditModal.style.display = 'none';
+}
+
+// --- 2. Pending Approval Modal ---
+function openApprovalModal() {
+    approvalModal.style.display = 'flex';
+    loadPendingUsers('all');
+}
+
+function closeApprovalModal() {
+    approvalModal.style.display = 'none';
+}
+
+function loadPendingUsers(role) {
+    document.querySelectorAll('.pending-tabs .tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+    const activeTab = document.getElementById('tab-' + role);
+    if (activeTab) activeTab.classList.add('active-tab');
+
+    document.getElementById('pending-list').innerHTML = "<p style='color:#a0aec0;'>Loading pending users...</p>";
+    
+    fetch('/logic/controller/get_pending_users.php?role=' + encodeURIComponent(role))
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('pending-list').innerHTML = html;
+        })
+        .catch(err => {
+            console.error('Error fetching pending users:', err);
+            document.getElementById('pending-list').innerHTML = "<p style='color:#e53e3e;'>Error loading users.</p>";
+        });
+}
+
+// --- 3. User Details Sub-Modal ---
+function openUserDetailModal(user) {
+    document.getElementById('detail-name').textContent = user.full_name || 'N/A';
+    document.getElementById('detail-role').textContent = user.role_type || 'N/A';
+    document.getElementById('detail-reg').textContent = user.reg_number || 'N/A';
+    document.getElementById('detail-email').textContent = user.email || 'N/A';
+    
+    const approveBtn = document.getElementById('detail-approve-btn');
+    if (approveBtn) {
+        approveBtn.setAttribute('data-userid', user.userid);
     }
+    
+    userDetailModal.style.display = 'flex';
+}
 
+function closeUserDetailModal() {
+    userDetailModal.style.display = 'none';
+}
 
-// Ensure this is clearly defined in your <script> block
-// Add this new listener to your <script> block
-document.getElementById('pending-list').addEventListener('click', function(e) {
-    // Check if the clicked element has the class 'btn-approve-user'
+// --- 4. Global Event Handlers for Modals ---
+
+// Handle User Approval Button Clicks
+document.addEventListener('click', function(e) {
     if (e.target && e.target.classList.contains('btn-approve-user')) {
         const userid = e.target.getAttribute('data-userid');
+        if (!userid) return;
         
         if (confirm('Approve this user?')) {
             fetch('/logic/controller/approveuser.php', {
@@ -252,8 +366,9 @@ document.getElementById('pending-list').addEventListener('click', function(e) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert('User approved!');
-                    openApprovalModal(); // Refresh modal content
+                    alert('User approved successfully!');
+                    closeUserDetailModal();
+                    openApprovalModal(); 
                 } else {
                     alert('Error: ' + (data.message || 'Unknown error'));
                 }
@@ -263,13 +378,12 @@ document.getElementById('pending-list').addEventListener('click', function(e) {
     }
 });
 
-// Global click handler to close modals
-window.onclick = function(event) {
-    if (event.target == modal) closeAuditModal();
-    if (event.target == approvalModal) closeApprovalModal();
-};
-
-                    
+// Close Modals when clicking outside (Backdrop Click Handler)
+window.addEventListener('click', function(event) {
+    if (event.target === auditModal) closeAuditModal();
+    if (event.target === approvalModal) closeApprovalModal();
+    if (event.target === userDetailModal) closeUserDetailModal();
+});             
     </script>
 </body>
 </html>
