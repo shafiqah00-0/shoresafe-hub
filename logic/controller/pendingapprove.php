@@ -2,10 +2,15 @@
 // /logic/controller/get_pending_users.php
 require_once __DIR__ . '/../../config/database.php';
 
+// Capture and sanitize the requested role tab (defaulting to 'authorities')
+$role = $_GET['role'] ?? 'authorities';
 
-// Fetch pending users based on tab selection
-$stmt = $pdo->prepare("SELECT userid, full_name, role_type, reg_number, email FROM users WHERE status = 'pending' ");
-$users = $stmt->fetch(PDO::FETCH_ASSOC);
+// Fetch pending users dynamically matching the selected role
+$stmt = $pdo->prepare("SELECT userid, full_name, role_type, reg_number, email FROM users WHERE status = 'pending' AND role_type = :role");
+$stmt->execute(['role' => $role]);
+
+// Use fetchAll() so $users contains an array of all matching rows
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (empty($users)) {
     echo "<p style='text-align:center; padding: 20px; color: #a0aec0;'>No pending " . htmlspecialchars($role) . " found.</p>";
@@ -19,7 +24,6 @@ if (empty($users)) {
           </tr></thead><tbody>";
     
     foreach ($users as $u) {
-        // Encode user object safely for JavaScript consumption
         $jsonUserData = htmlspecialchars(json_encode($u), ENT_QUOTES, 'UTF-8');
         
         echo "<tr style='border-bottom: 1px solid #edf2f7;'>
