@@ -369,10 +369,10 @@ function loadPendingUsers(role) {
 
 // --- 3. User Details Sub-Modal ---
 function openUserDetailModal(user) {
-    document.getElementById('detail-name').textContent = user.full_name || 'N/A';
-    document.getElementById('detail-role').textContent = user.role_type || 'N/A';
-    document.getElementById('detail-reg').textContent = user.reg_number || 'N/A';
-    document.getElementById('detail-email').textContent = user.email || 'N/A';
+    document.getElementById('full_name').textContent = user.full_name || 'N/A';
+    document.getElementById('role_type').textContent = user.role_type || 'N/A';
+    document.getElementById('reg_num').textContent = user.reg_number || 'N/A';
+    document.getElementById('email').textContent = user.email || 'N/A';
     
     const approveBtn = document.getElementById('detail-approve-btn');
     if (approveBtn) {
