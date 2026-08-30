@@ -18,7 +18,6 @@ if (empty($users)) {
     echo "<table class='audit-table' style='width:100%; border-collapse: collapse;'>";
     echo "<thead style='background: #f7fafc;'><tr>
             <th style='padding: 10px; text-align: left; color: dark grey;'>Name</th>
-            <th style='padding: 10px; text-align: left; color: dark grey;'>Role</th>
             <th style='padding: 10px; text-align: left; color:dark grey;'>Reg#</th>
             <th style='padding: 10px; text-align: center; color: dark grey;'>Action</th>
           </tr></thead><tbody>";
@@ -28,7 +27,6 @@ if (empty($users)) {
         
         echo "<tr style='border-bottom: 1px solid #edf2f7;'>
             <td style='padding: 10px; font-weight: 500; color : white;'>" . htmlspecialchars($u['full_name']) . "</td>
-            <td style='padding: 10px; color: white;'>" . htmlspecialchars($u['role_type']) . "</td>
             <td style='padding: 10px; color: white;'>" . htmlspecialchars($u['reg_number']) . "</td>
             <td style='padding: 10px; text-align: center;'>
                 <button type='button' onclick='openUserDetailModal({$jsonUserData})' 
