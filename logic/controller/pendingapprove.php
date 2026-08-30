@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 // Fetch pending users based on tab selection
 $stmt = $pdo->prepare("SELECT userid, full_name, role_type, reg_number, email FROM users WHERE status = 'pending' ");
-// $stmt->execute(['role' => $role]);
+ $stmt->execute(['role_type' => $role]);
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (empty($users)) {
