@@ -133,7 +133,7 @@ $total_pending = $pending_data['total_pending'];
         <?php if($total_pages > 1): ?>
             <div class="pagination">
                 <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="audit_logs.php?p=<?= $i ?>&actiondo=<?= urlencode($filter_action) ?>" class="<?= $page === $i ? 'active' : '' ?>"><?= $i ?></a>
+                    <a href="auditlogs.php?p=<?= $i ?>&actiondo=<?= urlencode($filter_action) ?>" class="<?= $page === $i ? 'active' : '' ?>"><?= $i ?></a>
                 <?php endfor; ?>
             </div>
         <?php endif; ?>
@@ -356,7 +356,7 @@ function loadPendingUsers(role) {
 
     document.getElementById('pending-list').innerHTML = "<p style='color:#a0aec0;'>Loading pending users...</p>";
     
-    fetch('/logic/controller/get_pending_users.php?role=' + encodeURIComponent(role))
+    fetch('/logic/controller/pendingapprove.php?role=' + encodeURIComponent(role))
         .then(response => response.text())
         .then(html => {
             document.getElementById('pending-list').innerHTML = html;
