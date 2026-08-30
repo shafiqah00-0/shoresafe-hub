@@ -184,10 +184,10 @@ $total_pending = $pending_data['total_pending'];
         </div>
         <div class="modal-body">
             <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.95rem;">
-                <p><strong>Full Name:</strong> <span id="detail-name">-</span></p>
-                <p><strong>Role Type:</strong> <span id="detail-role">-</span></p>
-                <p><strong>Registration ID:</strong> <span id="detail-reg">-</span></p>
-                <p><strong>Email:</strong> <span id="detail-email">-</span></p>
+                <p><strong>Full Name:</strong> <span id="full_name">-</span></p>
+                <p><strong>Role Type:</strong> <span id="role_type">-</span></p>
+                <p><strong>Registration ID:</strong> <span id="reg_num">-</span></p>
+                <p><strong>Email:</strong> <span id="email">-</span></p>
             </div>
             <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
                 <button type="button" onclick="closeUserDetailModal()" style="padding: 8px 14px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer;">Close</button>
