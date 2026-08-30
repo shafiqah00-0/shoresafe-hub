@@ -17,10 +17,10 @@ if (empty($users)) {
 } else {
     echo "<table class='audit-table' style='width:100%; border-collapse: collapse;'>";
     echo "<thead style='background: #f7fafc;'><tr>
-            <th style='padding: 10px; text-align: left; color: white;'>Name</th>
-            <th style='padding: 10px; text-align: left; color: white;'>Role</th>
-            <th style='padding: 10px; text-align: left; color: white;'>Reg#</th>
-            <th style='padding: 10px; text-align: center; color: white;'>Action</th>
+            <th style='padding: 10px; text-align: left; color: dark grey;'>Name</th>
+            <th style='padding: 10px; text-align: left; color: dark grey;'>Role</th>
+            <th style='padding: 10px; text-align: left; color:dark grey;'>Reg#</th>
+            <th style='padding: 10px; text-align: center; color: dark grey;'>Action</th>
           </tr></thead><tbody>";
     
     foreach ($users as $u) {
