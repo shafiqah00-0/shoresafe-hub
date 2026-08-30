@@ -28,8 +28,8 @@ if (empty($users)) {
         
         echo "<tr style='border-bottom: 1px solid #edf2f7;'>
             <td style='padding: 10px; font-weight: 500; color : white;'>" . htmlspecialchars($u['full_name']) . "</td>
-            <td style='padding: 10px; color: #718096;'>" . htmlspecialchars($u['role_type']) . "</td>
-            <td style='padding: 10px; color: #718096;'>" . htmlspecialchars($u['reg_number']) . "</td>
+            <td style='padding: 10px; color: white;'>" . htmlspecialchars($u['role_type']) . "</td>
+            <td style='padding: 10px; color: white;'>" . htmlspecialchars($u['reg_number']) . "</td>
             <td style='padding: 10px; text-align: center;'>
                 <button type='button' onclick='openUserDetailModal({$jsonUserData})' 
                         style='background:#3182ce; color:white; border:none; padding:5px 12px; cursor:pointer; border-radius:4px;'>
